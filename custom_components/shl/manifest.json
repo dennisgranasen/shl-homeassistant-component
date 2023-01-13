@@ -1,0 +1,10 @@
+{
+  "domain": "shl",
+  "name": "SHL",
+  "documentation": "https://github.com/dennisgranasen/shl-homeassistant-component",
+  "issue_tracker": "https://github.com/dennisgranasen/shl-homeassistant-component/issues",
+  "dependencies": [],
+  "config_flow": true,
+  "codeowners": ["@dennisgranasen"],
+  "requirements": []
+}
