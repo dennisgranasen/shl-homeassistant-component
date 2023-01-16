@@ -1,0 +1,30 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Kika här om du behöver hjälp: https://github.com/dennisgranasen/shl-homeassistant-component",
+        "data": {
+          "username": "Användarnamn",
+          "password": "Lösenord"
+        }
+      }
+    },
+    "error": {
+      "auth": "Fel användarnamn/lösenord."
+    },
+    "abort": {
+      "single_instance_allowed": "Multipla instanser av denna komponent tillåts inte."
+    }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "data": {
+          "binary_sensor": "Binär sensor aktiverad",
+          "sensor": "Sensor aktiverad",
+          "switch": "Brytare aktiverad"
+        }
+      }
+    }
+  }
+}

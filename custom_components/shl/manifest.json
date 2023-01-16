@@ -1,10 +1,13 @@
 {
   "domain": "shl",
   "name": "SHL",
+  "version": "0.0.1",
   "documentation": "https://github.com/dennisgranasen/shl-homeassistant-component",
   "issue_tracker": "https://github.com/dennisgranasen/shl-homeassistant-component/issues",
   "dependencies": [],
   "config_flow": true,
   "codeowners": ["@dennisgranasen"],
+  "iot_class": "cloud_polling",
+  "integration_type": "hub",
   "requirements": []
 }

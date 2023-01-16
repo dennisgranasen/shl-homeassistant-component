@@ -2,7 +2,6 @@
   "config": {
     "step": {
       "user": {
-        "title": "SHL",
         "description": "Hvis du trenger hjep til konfigurasjon ta en titt her: https://github.com/dennisgranasen/shl-homeassistant-component",
         "data": {
           "username": "Brukernavn",
