@@ -8,6 +8,7 @@ from .const import VERSION
 
 
 class ShlEntity(CoordinatorEntity):
+    """An entity for tracking SHL information"""
     def __init__(self, coordinator, config_entry):
         super().__init__(coordinator)
         self.config_entry = config_entry

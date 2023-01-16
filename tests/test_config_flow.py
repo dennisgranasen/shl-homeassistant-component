@@ -2,6 +2,11 @@
 from unittest.mock import patch
 
 import pytest
+
+from homeassistant import config_entries
+from homeassistant import data_entry_flow
+from pytest_homeassistant_custom_component.common import MockConfigEntry
+
 from custom_components.shl.const import (
     BINARY_SENSOR,
 )
@@ -17,9 +22,6 @@ from custom_components.shl.const import (
 from custom_components.shl.const import (
     SWITCH,
 )
-from homeassistant import config_entries
-from homeassistant import data_entry_flow
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from .const import MOCK_CONFIG
 
@@ -69,7 +71,7 @@ async def test_successful_config_flow(hass, bypass_get_data):
 # We use the `error_on_get_data` mock instead of `bypass_get_data`
 # (note the function parameters) to raise an Exception during
 # validation of the input config.
-async def test_failed_config_flow(hass, error_on_get_data):
+async def test_failed_config_flow(hass, error_on_get_data):  # pylint: disable=unused-argument
     """Test a failed config flow due to credential validation failure."""
 
     result = await hass.config_entries.flow.async_init(

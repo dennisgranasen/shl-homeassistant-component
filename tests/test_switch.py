@@ -2,6 +2,11 @@
 from unittest.mock import call
 from unittest.mock import patch
 
+from homeassistant.components.switch import SERVICE_TURN_OFF
+from homeassistant.components.switch import SERVICE_TURN_ON
+from homeassistant.const import ATTR_ENTITY_ID
+from pytest_homeassistant_custom_component.common import MockConfigEntry
+
 from custom_components.shl import (
     async_setup_entry,
 )
@@ -14,10 +19,6 @@ from custom_components.shl.const import (
 from custom_components.shl.const import (
     SWITCH,
 )
-from homeassistant.components.switch import SERVICE_TURN_OFF
-from homeassistant.components.switch import SERVICE_TURN_ON
-from homeassistant.const import ATTR_ENTITY_ID
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from .const import MOCK_CONFIG
 

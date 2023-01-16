@@ -3,9 +3,9 @@
 NAME = "SHL"
 DOMAIN = "shl"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.0.0"
+VERSION = "0.0.1"
 
-ATTRIBUTION = "Data provided by http://jsonplaceholder.typicode.com/"
+ATTRIBUTION = "Data provided by http://openapi.shl.se/"
 ISSUE_URL = "https://github.com/dennisgranasen/shl-homeassistant-component/issues"
 
 # Icons
@@ -23,8 +23,9 @@ PLATFORMS = [BINARY_SENSOR, SENSOR, SWITCH]
 
 # Configuration and options
 CONF_ENABLED = "enabled"
-CONF_USERNAME = "username"
-CONF_PASSWORD = "password"
+CONF_CLIENT_ID = "client_id"
+CONF_CLIENT_SECRET = "client_secret"
+CONF_TEAM_IDS = "team_ids"
 
 # Defaults
 DEFAULT_NAME = DOMAIN

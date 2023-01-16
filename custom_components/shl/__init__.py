@@ -17,8 +17,9 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from .api import ShlApiClient
-from .const import CONF_PASSWORD
-from .const import CONF_USERNAME
+from .const import CONF_CLIENT_ID
+from .const import CONF_CLIENT_SECRET
+from .const import CONF_TEAM_IDS
 from .const import DOMAIN
 from .const import PLATFORMS
 from .const import STARTUP_MESSAGE
@@ -28,7 +29,7 @@ SCAN_INTERVAL = timedelta(seconds=30)
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
-async def async_setup(hass: HomeAssistant, config: Config):
+async def async_setup(hass: HomeAssistant, config: Config):  # pylint: disable=unused-argument
     """Set up this integration using YAML is not supported."""
     return True
 
@@ -39,11 +40,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.info(STARTUP_MESSAGE)
 
-    username = entry.data.get(CONF_USERNAME)
-    password = entry.data.get(CONF_PASSWORD)
+    cid = entry.data.get(CONF_CLIENT_ID)
+    csec = entry.data.get(CONF_CLIENT_SECRET)
+    team_ids = entry.data.get(CONF_TEAM_IDS)
 
     session = async_get_clientsession(hass)
-    client = ShlApiClient(username, password, session)
+    client = ShlApiClient(cid, csec, team_ids, session)
 
     coordinator = ShlDataUpdateCoordinator(hass, client=client)
     await coordinator.async_refresh()

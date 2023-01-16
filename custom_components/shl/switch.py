@@ -6,7 +6,7 @@ from .const import DOMAIN
 from .const import ICON
 from .const import SWITCH
 from .entity import ShlEntity
-
+#from .api import ShlApiClient
 
 async def async_setup_entry(hass, entry, async_add_devices):
     """Setup sensor platform."""
@@ -19,7 +19,10 @@ class ShlBinarySwitch(ShlEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs):  # pylint: disable=unused-argument
         """Turn on the switch."""
+		#api = ShlApiClient 
+		#api.async_get_videos()
         await self.coordinator.api.async_set_title("bar")
+		
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs):  # pylint: disable=unused-argument
