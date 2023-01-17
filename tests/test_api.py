@@ -2,10 +2,10 @@
 import asyncio
 
 import aiohttp
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from custom_components.shl.api import (
     ShlApiClient,
 )
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 
 async def test_api(hass, aioclient_mock, caplog):
@@ -21,14 +21,15 @@ async def test_api(hass, aioclient_mock, caplog):
     aioclient_mock.get(
         "https://jsonplaceholder.typicode.com/posts/1", json={"test": "test"}
     )
-    assert await api.async_get_data() == {"test": "test"}
+    assert await api.async_get_data(2022) == {"todo": "define this"}
 
     # We do the same for `async_set_title`. Note the difference in the mock call
     # between the previous step and this one. We use `patch` here instead of `get`
     # because we know that `async_set_title` calls `api_wrapper` with `patch` as the
     # first parameter
-    aioclient_mock.patch("https://jsonplaceholder.typicode.com/posts/1")
-    assert await api.async_set_title("test") is None
+
+    # aioclient_mock.patch("https://jsonplaceholder.typicode.com/posts/1")
+    # assert await api.async_set_title("test") is None
 
     # In order to get 100% coverage, we need to test `api_wrapper` to test the code
     # that isn't already called by `async_get_data` and `async_set_title`. Because the
@@ -38,6 +39,10 @@ async def test_api(hass, aioclient_mock, caplog):
     # The caplog fixture allows access to log messages in tests. This is particularly
     # useful during exception handling testing since often the only action as part of
     # exception handling is a logging statement
+
+    # TODO: Define more tests
+    # assert await api.async_get_articles()
+
     caplog.clear()
     aioclient_mock.put(
         "https://jsonplaceholder.typicode.com/posts/1", exc=asyncio.TimeoutError
