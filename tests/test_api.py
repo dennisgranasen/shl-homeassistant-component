@@ -18,10 +18,44 @@ async def test_api(hass, aioclient_mock, caplog):
     # to mock responses to aiohttp requests. In this case we are telling the mock to
     # return {"test": "test"} when a `GET` call is made to the specified URL. We then
     # call `async_get_data` which will make that `GET` request.
-    aioclient_mock.get(
-        "https://jsonplaceholder.typicode.com/posts/1", json={"test": "test"}
+    aioclient_mock.post(
+        "https://openapi.shl.se/oauth2/token",
+        json={"expires_in": 1800, "access_token": 0xDEADBEEF}
     )
-    assert await api.async_get_data(2022) == {"todo": "define this"}
+    assert not api.is_connected()
+    assert await api.async_connect() == {"expires_in": 1800, "access_token": 0xDEADBEEF}
+    assert api.is_connected()
+
+    aioclient_mock.get(
+        "https://openapi.shl.se/articles.json",
+        json=[{"article_id": "a1", "title": "SM-guld", "team_code": "HV71"}]
+    )
+    assert api.async_get_articles(["HV71"]) == [{"article_id": "a1",
+                                                 "title": "SM-guld",
+                                                 "team_code": "HV71"}]
+
+    aioclient_mock.get(
+        "https://openapi.shl.se/seasons/2022/games.json",
+        json={"test": "me"}
+    )
+    assert api.async_get_games(2022, ["HV71"]) == {"test": "me"}
+
+    aioclient_mock.get(
+        "https://openapi.shl.se/seasons/2022/games/m1234.json",
+        json={"try": "me2"}
+    )
+    assert api.async_get_game(2022, "m1234") == {"try": "me2"}
+
+    assert api.async_get_goalie_stats(2022)
+    assert api.async_get_goalie_stats(2022, team_ids=["HV71"])
+    assert api.async_get_player_stats(2022)
+    assert api.async_get_player_stats(2022, team_ids=["HV71"])
+    assert api.async_get_team_player_stats("HV71")
+    assert api.async_get_team_stats(2022)
+    assert api.async_get_team_stats(2022, ["HV71"])
+    assert api.async_get_teams()
+    assert api.async_get_videos()
+    assert api.async_get_videos(["HV71"])
 
     # We do the same for `async_set_title`. Note the difference in the mock call
     # between the previous step and this one. We use `patch` here instead of `get`

@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-pytest_plugins = "pytest_homeassistant_custom_component"
+pytest_plugins = "pytest_homeassistant_custom_component"  # pylint: disable=invalid-name
 
 
 # This fixture is used to prevent HomeAssistant from attempting to create and dismiss persistent

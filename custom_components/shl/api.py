@@ -35,7 +35,7 @@ class ShlApiClient:
         self._expires = datetime.min
         self._headers = None
 
-    async def connect(self) -> None:
+    async def async_connect(self) -> None:
         """Authorize the client using supplied credentials."""
         form = {'client_id': self._client_id,
                 'client_secret': self._client_secret,
@@ -45,6 +45,7 @@ class ShlApiClient:
         self._expires = datetime.now() + int(body['expires_in'])
         self._headers = HEADERS.copy()
         self._headers['Authorization'] = "Bearer " + body['access_token']
+        return body
 
     def is_connected(self) -> bool:
         """Check if authorization is valid."""
