@@ -2,7 +2,9 @@
 import asyncio
 
 import aiohttp
+
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
 from custom_components.shl.api import (
     ShlApiClient,
 )
@@ -20,7 +22,7 @@ async def test_api(hass, aioclient_mock, caplog):
     # call `async_get_data` which will make that `GET` request.
     aioclient_mock.post(
         "https://openapi.shl.se/oauth2/token",
-        json={"expires_in": 1800, "access_token": 0xDEADBEEF}
+        json={"expires_in": 1800, "access_token": 0xDEADBEEF},
     )
     assert not api.is_connected()
     assert await api.async_connect() == {"expires_in": 1800, "access_token": 0xDEADBEEF}
@@ -28,34 +30,58 @@ async def test_api(hass, aioclient_mock, caplog):
 
     aioclient_mock.get(
         "https://openapi.shl.se/articles.json",
-        json=[{"article_id": "a1", "title": "SM-guld", "team_code": "HV71"}]
+        json=[{"article_id": "a1", "title": "SM-guld", "team_code": "HV71"}],
     )
-    assert api.async_get_articles(["HV71"]) == [{"article_id": "a1",
-                                                 "title": "SM-guld",
-                                                 "team_code": "HV71"}]
+    assert api.async_get_articles(["HV71"]) == [
+        {"article_id": "a1", "title": "SM-guld", "team_code": "HV71"}
+    ]
 
     aioclient_mock.get(
-        "https://openapi.shl.se/seasons/2022/games.json",
-        json={"test": "me"}
+        "https://openapi.shl.se/seasons/2022/games.json", json={"test": "me"}
     )
     assert api.async_get_games(2022, ["HV71"]) == {"test": "me"}
 
     aioclient_mock.get(
-        "https://openapi.shl.se/seasons/2022/games/m1234.json",
-        json={"try": "me2"}
+        "https://openapi.shl.se/seasons/2022/games/m1234.json", json={"try": "me2"}
     )
     assert api.async_get_game(2022, "m1234") == {"try": "me2"}
 
-    assert api.async_get_goalie_stats(2022)
-    assert api.async_get_goalie_stats(2022, team_ids=["HV71"])
-    assert api.async_get_player_stats(2022)
-    assert api.async_get_player_stats(2022, team_ids=["HV71"])
-    assert api.async_get_team_player_stats("HV71")
-    assert api.async_get_team_stats(2022)
-    assert api.async_get_team_stats(2022, ["HV71"])
+    aioclient_mock.get(
+        "https://openapi.shl.se/seasons/2022/statistics/players.json",
+        json={"player": {"no": 21, "name": "Peter Forsberg"}},
+    )
+    assert api.async_get_player_stats(2022) == {
+        "player": {"no": 21, "name": "Peter Forsberg"}
+    }
+    assert api.async_get_player_stats(2022, team_ids=["Modo"]) == {
+        "player": {"no": 21, "name": "Peter Forsberg"}
+    }
+
+    aioclient_mock.get(
+        "https://openapi.shl.se/seasons/2022/statistics/goalkeepers.json",
+        json={"Legend": "Stefan Liv"},
+    )
+    assert api.async_get_goalie_stats(2022) == {"Legend": "Stefan Liv"}
+    assert api.async_get_goalie_stats(2022, team_ids=["HV71"]) == {
+        "Legend": "Stefan Liv"
+    }
+
+    aioclient_mock.get("https://openapi.shl.se/teams/HV71.json", json={"hv": 71})
+    assert api.async_get_team_player_stats("HV71") == {"hv": 71}
+
+    aioclient_mock.get(
+        "https://openapi.shl.se/seasons/2022/statistics/teams/standings.json",
+        json={"hv71": 1},
+    )
+    assert api.async_get_team_stats(2022) == {"hv71": 1}
+    assert api.async_get_team_stats(2022, ["HV71"]) == {"hv71": 1}
     assert api.async_get_teams()
-    assert api.async_get_videos()
-    assert api.async_get_videos(["HV71"])
+
+    aioclient_mock.get(
+        "https://openapi.shl.se/videos.json", json={"video": "killed the radio star"}
+    )
+    assert api.async_get_videos() == {"video": "killed the radio star"}
+    assert api.async_get_videos(["HV71"]) == {"video": "killed the radio star"}
 
     # We do the same for `async_set_title`. Note the difference in the mock call
     # between the previous step and this one. We use `patch` here instead of `get`
