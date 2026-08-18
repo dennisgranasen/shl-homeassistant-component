@@ -1,96 +1,106 @@
-# SHL
+# SHL Home Assistant Integration
 
-[![GitHub Release][releases-shield]][releases]
-[![GitHub Activity][commits-shield]][commits]
-[![License][license-shield]](LICENSE)
+Home Assistant custom integration for Swedish Hockey League teams, powered by
+[TheSportsDB v1](https://www.thesportsdb.com/api/spec/v1/openapi.yaml).
 
-[![pre-commit][pre-commit-shield]][pre-commit]
-[![Black][black-shield]][black]
-
-[![hacs][hacsbadge]][hacs]
-[![Project Maintenance][maintenance-shield]][user_profile]
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
-
-[![Discord][discord-shield]][discord]
-[![Community Forum][forum-shield]][forum]
-
-**TO BE REMOVED: If you need help, as a developer, to use this custom component tempalte,
-please look at the [User Guide in the Cookiecutter documentation](https://cookiecutter-homeassistant-custom-component.readthedocs.io/en/stable/quickstart.html)**
-
-**This component will set up the following platforms.**
-
-| Platform        | Description                         |
-| --------------- | ----------------------------------- |
-| `binary_sensor` | Show something `True` or `False`.   |
-| `sensor`        | Show info from SHL API.             |
-| `switch`        | Switch something `True` or `False`. |
-
-![example][exampleimg]
+The integration creates one sensor for each configured team and exposes team
+metadata plus upcoming and previous events as state attributes. It is intended
+for Team Tracker-style dashboards and cards.
 
 ## Installation
 
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `shl`.
-4. Download _all_ the files from the `custom_components/shl/` directory (folder) in this repository.
-5. Place the files you downloaded in the new directory (folder) you created.
-6. Restart Home Assistant
-7. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "SHL"
+### HACS
 
-Using your HA configuration directory (folder) as a starting point you should now also have this:
+1. Open HACS in Home Assistant.
+2. Add this repository as a custom repository of type **Integration**.
+3. Install **SHL**.
+4. Restart Home Assistant.
+
+### Manual
+
+1. Copy `custom_components/shl` into the `custom_components` directory in your
+   Home Assistant configuration directory.
+2. Restart Home Assistant.
+
+The resulting path must be:
 
 ```text
-custom_components/shl/translations/en.json
-custom_components/shl/translations/fr.json
-custom_components/shl/translations/nb.json
-custom_components/shl/translations/sensor.en.json
-custom_components/shl/translations/sensor.fr.json
-custom_components/shl/translations/sensor.nb.json
-custom_components/shl/translations/sensor.nb.json
-custom_components/shl/__init__.py
-custom_components/shl/api.py
-custom_components/shl/binary_sensor.py
-custom_components/shl/config_flow.py
-custom_components/shl/const.py
-custom_components/shl/manifest.json
-custom_components/shl/sensor.py
-custom_components/shl/switch.py
+config/custom_components/shl/manifest.json
 ```
 
-## Configuration is done in the UI
+## Configuration
 
-<!---->
+Configuration is performed from **Settings -> Devices & services -> Add
+Integration -> SHL**.
 
-## Contributions are welcome!
+Enter:
 
-If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
+- **TheSportsDB API key**: `123` is the free v1 test key. Use your own key if
+  you have one.
+- **SHL team names**: one or more team names, for example `HV71` and `Lulea`.
 
-## Credits
+The integration searches TheSportsDB for each team name and refreshes the data
+every 30 seconds.
 
-This project was generated from [@oncleben31](https://github.com/oncleben31)'s [Home Assistant Custom Component Cookiecutter](https://github.com/oncleben31/cookiecutter-homeassistant-custom-component) template.
+## Entities
 
-Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [integration_blueprint][integration_blueprint] template
+Each configured team is exposed as a sensor named like:
 
----
+```text
+sensor.shl_hv71_sensor
+```
 
-[integration_blueprint]: https://github.com/custom-components/integration_blueprint
-[black]: https://github.com/psf/black
-[black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
-[buymecoffee]: https://www.buymeacoffee.com/dennisgranasen
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
-[commits-shield]: https://img.shields.io/github/commit-activity/y/dennisgranasen/shl-homeassistant-component.svg?style=for-the-badge
-[commits]: https://github.com/dennisgranasen/shl-homeassistant-component/commits/main
-[hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
-[discord]: https://discord.gg/Qa5fW2R
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
-[exampleimg]: example.png
-[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
-[forum]: https://community.home-assistant.io/
-[license-shield]: https://img.shields.io/github/license/dennisgranasen/shl-homeassistant-component.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/badge/maintainer-%40dennisgranasen-blue.svg?style=for-the-badge
-[pre-commit]: https://github.com/pre-commit/pre-commit
-[pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/dennisgranasen/shl-homeassistant-component.svg?style=for-the-badge
-[releases]: https://github.com/dennisgranasen/shl-homeassistant-component/releases
-[user_profile]: https://github.com/dennisgranasen
+The sensor state is the team's points when available, or the team status/name
+when points are not provided by TheSportsDB. Attributes include:
+
+- `team`
+- `team_name`
+- `idTeam`
+- `strLeague`
+- `strSport`
+- `next_events`
+- `previous_events`
+- `status`
+- `attribution`
+
+TheSportsDB v1 does not provide the complete SHL standings payload used by the
+retired SHL API. Standings fields such as rank, points, and goal difference may
+therefore be unavailable for some teams.
+
+## Development
+
+Create or activate the project virtual environment, then install dependencies:
+
+```bash
+python -m pip install -r requirements_dev.txt -r requirements_test.txt
+```
+
+Run the offline test suite:
+
+```bash
+pytest -q
+```
+
+Run the opt-in live TheSportsDB test using the local `secrets.yaml` file:
+
+```bash
+RUN_SHL_LIVE_TESTS=1 pytest -q tests/test_api_live.py
+```
+
+The live test expects:
+
+```yaml
+shlapikey: 123
+```
+
+Do not commit `secrets.yaml`.
+
+## Data source
+
+The integration uses TheSportsDB v1 endpoints for team search and team
+schedules. The free v1 key is not valid for TheSportsDB v2, which requires a
+Premium API key.
+
+## License
+
+See [LICENSE](LICENSE).
