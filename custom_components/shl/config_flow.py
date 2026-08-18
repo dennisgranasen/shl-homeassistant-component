@@ -2,7 +2,7 @@
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import SportsDbApiClient
 from .const import CONF_API_KEY
@@ -64,7 +64,7 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def _test_credentials(self, api_key, team_ids):
         """Return true if credentials is valid."""
         try:
-            session = async_create_clientsession(self.hass)
+            session = async_get_clientsession(self.hass)
             client = SportsDbApiClient(api_key, team_ids, session)
             await client.async_connect()
             return True
