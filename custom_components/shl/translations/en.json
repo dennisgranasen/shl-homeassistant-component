@@ -4,8 +4,8 @@
       "user": {
         "description": "If you need help with the configuration have a look here: https://github.com/dennisgranasen/shl-homeassistant-component",
         "data": {
-          "username": "Username",
-          "password": "Password"
+          "api_key": "TheSportsDB API key (use 123 if you don't have one)",
+          "team_ids": "SHL team names"
         }
       }
     },
@@ -20,9 +20,7 @@
     "step": {
       "user": {
         "data": {
-          "binary_sensor": "Binary sensor enabled",
-          "sensor": "Sensor enabled",
-          "switch": "Switch enabled"
+          "sensor": "Sensor enabled"
         }
       }
     }

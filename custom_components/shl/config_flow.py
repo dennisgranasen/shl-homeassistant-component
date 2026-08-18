@@ -4,9 +4,8 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .api import ShlApiClient
-from .const import CONF_CLIENT_ID
-from .const import CONF_CLIENT_SECRET
+from .api import SportsDbApiClient
+from .const import CONF_API_KEY
 from .const import CONF_TEAM_IDS
 from .const import DOMAIN
 from .const import PLATFORMS
@@ -16,7 +15,6 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for shl."""
 
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     def __init__(self):
         """Initialize."""
@@ -32,11 +30,11 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             valid = await self._test_credentials(
-                user_input[CONF_CLIENT_ID], user_input[CONF_CLIENT_SECRET]
+                user_input[CONF_API_KEY], user_input.get(CONF_TEAM_IDS, [])
             )
             if valid:
                 return self.async_create_entry(
-                    title=user_input[CONF_CLIENT_ID], data=user_input
+                    title="TheSportsDB SHL", data=user_input
                 )
             else:
                 self._errors["base"] = "auth"
@@ -55,17 +53,20 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
-                {vol.Required(CONF_CLIENT_ID): str, vol.Required(CONF_CLIENT_SECRET): str, vol.Optional(CONF_TEAM_IDS): list[str]}
+                {
+                    vol.Required(CONF_API_KEY): str,
+                    vol.Required(CONF_TEAM_IDS): [str],
+                }
             ),
             errors=self._errors,
         )
 
-    async def _test_credentials(self, username, password):
+    async def _test_credentials(self, api_key, team_ids):
         """Return true if credentials is valid."""
         try:
             session = async_create_clientsession(self.hass)
-            client = ShlApiClient(username, password, [], session)
-            await client.async_get_data()
+            client = SportsDbApiClient(api_key, team_ids, session)
+            await client.async_connect()
             return True
         except Exception:  # pylint: disable=broad-except
             pass
@@ -103,5 +104,5 @@ class ShlOptionsFlowHandler(config_entries.OptionsFlow):
     async def _update_options(self):
         """Update config entry options."""
         return self.async_create_entry(
-            title=self.config_entry.data.get(CONF_CLIENT_ID), data=self.options
+            title="TheSportsDB SHL", data=self.options
         )

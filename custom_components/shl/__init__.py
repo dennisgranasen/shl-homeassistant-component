@@ -9,22 +9,23 @@ import logging
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import Config
 from homeassistant.core import HomeAssistant
+from homeassistant.core_config import Config
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
-from .api import ShlApiClient
-from .const import CONF_CLIENT_ID
-from .const import CONF_CLIENT_SECRET
+from .api import SportsDbApiClient
+from .const import CONF_API_KEY
 from .const import CONF_TEAM_IDS
 from .const import DOMAIN
 from .const import PLATFORMS
 from .const import STARTUP_MESSAGE
 
 SCAN_INTERVAL = timedelta(seconds=30)
+
+ShlApiClient = SportsDbApiClient
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -40,12 +41,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.info(STARTUP_MESSAGE)
 
-    cid = entry.data.get(CONF_CLIENT_ID)
-    csec = entry.data.get(CONF_CLIENT_SECRET)
+    api_key = entry.data.get(CONF_API_KEY) or entry.data.get("client_secret") or entry.data.get("client_id")
     team_ids = entry.data.get(CONF_TEAM_IDS)
 
     session = async_get_clientsession(hass)
-    client = ShlApiClient(cid, csec, team_ids, session)
+    client = ShlApiClient(api_key, team_ids, session)
 
     coordinator = ShlDataUpdateCoordinator(hass, client=client)
     await coordinator.async_refresh()
@@ -55,14 +55,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
-    for platform in PLATFORMS:
-        if entry.options.get(platform, True):
-            coordinator.platforms.append(platform)
-            hass.async_add_job(
-                hass.config_entries.async_forward_entry_setup(entry, platform)
-            )
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
-    entry.add_update_listener(async_reload_entry)
+    platforms = [platform for platform in PLATFORMS if entry.options.get(platform, True)]
+    coordinator.platforms = platforms
+    await hass.config_entries.async_forward_entry_setups(entry, platforms)
     return True
 
 
@@ -72,7 +69,7 @@ class ShlDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass: HomeAssistant,
-        client: ShlApiClient,
+        client: SportsDbApiClient,
     ) -> None:
         """Initialize."""
         self.api = client
@@ -90,16 +87,11 @@ class ShlDataUpdateCoordinator(DataUpdateCoordinator):
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Handle removal of an entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-    unloaded = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in PLATFORMS
-                if platform in coordinator.platforms
-            ]
-        )
-    )
+    coordinator = hass.data[DOMAIN].get(entry.entry_id)
+    if coordinator is None:
+        return True
+
+    unloaded = await hass.config_entries.async_unload_platforms(entry, coordinator.platforms)
     if unloaded:
         hass.data[DOMAIN].pop(entry.entry_id)
 

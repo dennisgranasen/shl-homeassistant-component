@@ -4,8 +4,8 @@
       "user": {
         "description": "Hvis du trenger hjep til konfigurasjon ta en titt her: https://github.com/dennisgranasen/shl-homeassistant-component",
         "data": {
-          "username": "Brukernavn",
-          "password": "Passord"
+          "api_key": "TheSportsDB API-nøkkel (bruk 123 hvis du ikke har en)",
+          "team_ids": "SHL-lagnavn"
         }
       }
     },
@@ -20,9 +20,7 @@
     "step": {
       "user": {
         "data": {
-          "binary_sensor": "Binær sensor aktivert",
-          "sensor": "Sensor aktivert",
-          "switch": "Bryter aktivert"
+          "sensor": "Sensor aktivert"
         }
       }
     }

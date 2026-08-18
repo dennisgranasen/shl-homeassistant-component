@@ -3,9 +3,9 @@
 NAME = "SHL"
 DOMAIN = "shl"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
-ATTRIBUTION = "Data provided by http://openapi.shl.se/"
+ATTRIBUTION = "Data provided by http://www.thesportsdb.com/"
 ISSUE_URL = "https://github.com/dennisgranasen/shl-homeassistant-component/issues"
 
 # Icons
@@ -15,16 +15,13 @@ ICON = "mdi:format-quote-close"
 BINARY_SENSOR_DEVICE_CLASS = "connectivity"
 
 # Platforms
-BINARY_SENSOR = "binary_sensor"
 SENSOR = "sensor"
-SWITCH = "switch"
-PLATFORMS = [BINARY_SENSOR, SENSOR, SWITCH]
+PLATFORMS = [SENSOR]
 
 
 # Configuration and options
 CONF_ENABLED = "enabled"
-CONF_CLIENT_ID = "client_id"
-CONF_CLIENT_SECRET = "client_secret"
+CONF_API_KEY = "api_key"
 CONF_TEAM_IDS = "team_ids"
 
 # Defaults
