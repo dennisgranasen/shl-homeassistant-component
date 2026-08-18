@@ -5,7 +5,7 @@
         "description": "Kika här om du behöver hjälp: https://github.com/dennisgranasen/shl-homeassistant-component",
         "data": {
           "api_key": "TheSportsDB API-nyckel (använd 123 om du inte har någon)",
-          "team_ids": "SHL-lagnamn"
+          "team_ids": "Svenska hockeylags namn"
         }
       }
     },

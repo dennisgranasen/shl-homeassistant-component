@@ -242,3 +242,86 @@ async def test_sportsdb_client_returns_team_tracker_data():
     assert result["team"]["previous_events"] == [
         {"strStatus": "Match Finished"}
     ]
+
+
+async def test_sportsdb_client_prefers_djurgarden_hockey_team():
+    """Prefer the SHL team when TheSportsDB returns a football namesake."""
+    class Response:
+        def __init__(self, payload):
+            self.payload = payload
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        def raise_for_status(self):
+            return None
+
+        async def json(self):
+            return self.payload
+
+    class Session:
+        def get(self, _url, params=None):
+            if params["t"] == "Djurgården":
+                return Response(
+                    {
+                        "teams": [
+                            {"strTeam": "Djurgården", "strSport": "Soccer"}
+                        ]
+                    }
+                )
+            return Response(
+                {
+                    "teams": [
+                        {
+                            "idTeam": "135139",
+                            "strTeam": "Djurgårdens IF",
+                            "strSport": "Ice Hockey",
+                            "strLeague": "Swedish Hockey League",
+                        }
+                    ]
+                }
+            )
+
+    client = SportsDbApiClient("123", [], Session())
+
+    team = await client.async_get_team("Djurgården")
+
+    assert team["idTeam"] == "135139"
+    assert team["strLeague"] == "Swedish Hockey League"
+
+
+async def test_sportsdb_client_supports_hockeyallsvenskan():
+    """Accept teams from Swedish Hockey Allsvenskan."""
+    class Response:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        def raise_for_status(self):
+            return None
+
+        async def json(self):
+            return {
+                "teams": [
+                    {
+                        "idTeam": "137304",
+                        "strTeam": "Leksands IF",
+                        "strSport": "Ice Hockey",
+                        "strLeague": "Swedish Hockey Allsvenskan",
+                    }
+                ]
+            }
+
+    class Session:
+        def get(self, _url, params=None):
+            return Response()
+
+    team = await SportsDbApiClient("123", [], Session()).async_get_team("Leksand")
+
+    assert team["idTeam"] == "137304"
+    assert team["strLeague"] == "Swedish Hockey Allsvenskan"

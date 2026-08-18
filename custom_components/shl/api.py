@@ -215,6 +215,13 @@ class ShlApiClient:
 
 
 SPORTSDB_BASE_URL = "https://www.thesportsdb.com/api/v1/json"
+TEAM_ALIASES = {
+    "djurgården": "Djurgårdens IF",
+    "skellefteå": "Skellefteå AIK",
+    "växjö": "Växjö Lakers",
+    "örebro": "Örebro HK",
+}
+SUPPORTED_LEAGUES = {"Swedish Hockey League", "Swedish Hockey Allsvenskan"}
 
 
 class SportsDbApiClient:
@@ -242,12 +249,27 @@ class SportsDbApiClient:
 
     async def async_get_team(self, team_name: str) -> dict:
         """Find a team by name."""
-        payload = await self._request("searchteams.php", {"t": team_name})
-        teams = payload.get("teams") or []
-        for team in teams:
-            if team.get("strTeam", "").casefold() == team_name.casefold():
-                return team
-        return teams[0] if teams else {}
+        search_names = [team_name]
+        alias = TEAM_ALIASES.get(team_name.casefold())
+        if alias:
+            search_names.append(alias)
+        if not alias:
+            search_names.append(f"{team_name} IF")
+
+        for search_name in search_names:
+            payload = await self._request("searchteams.php", {"t": search_name})
+            teams = payload.get("teams") or []
+            shl_teams = [
+                team
+                for team in teams
+                if team.get("strLeague") in SUPPORTED_LEAGUES
+            ]
+            for team in shl_teams:
+                if team.get("strTeam", "").casefold() == search_name.casefold():
+                    return team
+            if shl_teams:
+                return shl_teams[0]
+        return {}
 
     async def async_get_next_events(self, team_id: str) -> list[dict]:
         """Return the next five events for a team."""

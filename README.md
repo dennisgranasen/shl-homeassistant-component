@@ -1,6 +1,7 @@
 # SHL Home Assistant Integration
 
-Home Assistant custom integration for Swedish Hockey League teams, powered by
+Home Assistant custom integration for Swedish hockey teams in the Swedish
+Hockey League and Swedish Hockey Allsvenskan, powered by
 [TheSportsDB v1](https://www.thesportsdb.com/api/spec/v1/openapi.yaml).
 
 The integration creates one sensor for each configured team and exposes team
@@ -63,7 +64,7 @@ when points are not provided by TheSportsDB. Attributes include:
 - `status`
 - `attribution`
 
-TheSportsDB v1 does not provide the complete SHL standings payload used by the
+TheSportsDB v1 does not provide the complete standings payload used by the
 retired SHL API. Standings fields such as rank, points, and goal difference may
 therefore be unavailable for some teams.
 

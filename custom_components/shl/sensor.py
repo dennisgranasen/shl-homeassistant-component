@@ -60,7 +60,14 @@ class ShlSensor(ShlEntity):
         attrs = {
             "team": self._team_id,
             "team_name": team.get("team_name", self._team_id),
-            "attribution": "Data provided by http://openapi.shl.se/",
+            "team_id": team.get("idTeam"),
+            "team_abbr": team.get("strTeamShort", self._team_id),
+            "league": team.get("strLeague"),
+            "sport": team.get("strSport", "Ice Hockey"),
+            "logo": team.get("strBadge") or team.get("strLogo"),
+            "team_logo": team.get("strLogo"),
+            "badge": team.get("strBadge"),
+            "attribution": "Data provided by TheSportsDB",
             "integration": DOMAIN,
         }
         if team:
