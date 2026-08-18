@@ -8,6 +8,14 @@ from .const import SENSOR
 from .entity import ShlEntity
 
 
+def short_name(name: str | None) -> str | None:
+    """Return a compact name for Team Tracker attributes."""
+    if not name:
+        return None
+    name = name.strip()
+    return name[:3] if len(name) >= 5 else name
+
+
 def flatten_event(team: dict, event: dict | None, prefix: str) -> dict:
     """Flatten one TheSportsDB event for Team Tracker-style consumers."""
     if not event:
@@ -131,7 +139,7 @@ class ShlSensor(ShlEntity):
             "team": self._team_id,
             "team_name": team.get("team_name", self._team_id),
             "team_id": team.get("idTeam"),
-            "team_abbr": team.get("strTeamShort", self._team_id),
+            "team_abbr": short_name(team.get("team_name", self._team_id)),
             "league": team.get("strLeague"),
             "league_name": team.get("strLeague"),
             "sport": "hockey" if team.get("strSport") == "Ice Hockey" else team.get("strSport", "hockey"),
@@ -164,10 +172,14 @@ class ShlSensor(ShlEntity):
                     "live_events": live_events,
                     "team_logo": team.get("strBadge") or team.get("strLogo"),
                     "team_long_name": team.get("strTeam", self._team_id),
-                    "league_logo": team.get("strLeagueBadge"),
+                    "league_logo": event.get("strLeagueBadge")
+                    or team.get("strLeagueBadge"),
                     "team_url": team.get("strWebsite"),
                     "opponent_name": current_fields.get("current_game_opponent"),
                     "opponent_long_name": current_fields.get("current_game_opponent"),
+                    "opponent_abbr": short_name(
+                        current_fields.get("current_game_opponent")
+                    ),
                     "opponent_id": current_fields.get("current_game_opponent_id"),
                     "opponent_logo": current_fields.get("current_game_opponent_logo"),
                     "team_homeaway": current_fields.get("current_game_homeaway"),

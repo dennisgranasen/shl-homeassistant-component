@@ -4,3 +4,5 @@ pythonenv*
 .coverage
 venv
 .venv
+state_liverpool
+state_hv71

@@ -14,6 +14,7 @@ from custom_components.shl.api import (
     normalize_team_stats,
 )
 from custom_components.shl.sensor import flatten_event
+from custom_components.shl.sensor import ShlSensor
 from custom_components.shl.sensor import select_current_event
 
 
@@ -197,6 +198,55 @@ def test_normalize_team_stats_for_team_tracker_card():
         "last_5": "WWLLW",
         "status": "Playing",
     }
+
+
+def test_sensor_exposes_team_tracker_card_attributes():
+    """Expose the generic event and logo attributes consumed by the card."""
+    class Coordinator:
+        data = {
+            "body": {
+                "team": "HV71",
+                "team_name": "HV71",
+                "idTeam": "135142",
+                "strTeam": "HV71",
+                "strTeamShort": "HV71",
+                "strSport": "Ice Hockey",
+                "strLeague": "Swedish Hockey League",
+                "strBadge": "https://example.test/hv71.png",
+                "next_events": [
+                    {
+                        "idEvent": "2476494",
+                        "strEvent": "HV71 vs Malmö Redhawks",
+                        "idHomeTeam": "135142",
+                        "idAwayTeam": "135487",
+                        "strHomeTeam": "HV71",
+                        "strAwayTeam": "Malmö Redhawks",
+                        "strHomeTeamBadge": "https://example.test/hv71.png",
+                        "strAwayTeamBadge": "https://example.test/malmo.png",
+                        "strLeagueBadge": "https://example.test/shl.png",
+                        "dateEvent": "2026-09-19",
+                        "strTime": "13:15:00",
+                        "strVenue": "Husqvarna Garden",
+                        "strStatus": "NS",
+                    }
+                ],
+            }
+        }
+
+    class ConfigEntry:
+        entry_id = "test-entry"
+
+    sensor = ShlSensor(Coordinator(), ConfigEntry(), "HV71")
+
+    assert sensor.state == "PRE"
+    assert sensor.extra_state_attributes["sport"] == "hockey"
+    assert sensor.extra_state_attributes["team_abbr"] == "HV71"
+    assert sensor.extra_state_attributes["team_logo"] == "https://example.test/hv71.png"
+    assert sensor.extra_state_attributes["opponent_logo"] == "https://example.test/malmo.png"
+    assert sensor.extra_state_attributes["opponent_abbr"] == "Mal"
+    assert sensor.extra_state_attributes["league_logo"] == "https://example.test/shl.png"
+    assert sensor.extra_state_attributes["team_homeaway"] == "home"
+    assert sensor.extra_state_attributes["opponent_homeaway"] == "away"
 
 
 async def test_sportsdb_client_returns_team_tracker_data():
