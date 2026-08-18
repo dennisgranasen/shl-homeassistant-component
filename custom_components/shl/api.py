@@ -215,6 +215,7 @@ class ShlApiClient:
 
 
 SPORTSDB_BASE_URL = "https://www.thesportsdb.com/api/v1/json"
+SPORTSDB_V2_BASE_URL = "https://www.thesportsdb.com/api/v2/json"
 TEAM_ALIASES = {
     "djurgården": "Djurgårdens IF",
     "skellefteå": "Skellefteå AIK",
@@ -222,6 +223,13 @@ TEAM_ALIASES = {
     "örebro": "Örebro HK",
 }
 SUPPORTED_LEAGUES = {"Swedish Hockey League", "Swedish Hockey Allsvenskan"}
+
+
+def _event_sort_key(event: dict) -> str:
+    """Return a sortable timestamp for a TheSportsDB event."""
+    return event.get("strTimestamp") or (
+        f"{event.get('dateEvent', '')}T{event.get('strTime', '')}"
+    )
 
 
 class SportsDbApiClient:
@@ -242,6 +250,17 @@ class SportsDbApiClient:
             async with self._session.get(self._url(endpoint), params=params) as response:
                 response.raise_for_status()
                 return await response.json()
+
+    async def async_get_live_scores(self) -> list[dict]:
+        """Return current ice hockey scores from the Premium v2 API."""
+        url = f"{SPORTSDB_V2_BASE_URL}/livescore/Ice%20Hockey"
+        async with async_timeout.timeout(TIMEOUT):
+            async with self._session.get(
+                url, headers={"X-API-KEY": self._api_key}
+            ) as response:
+                response.raise_for_status()
+                payload = await response.json()
+        return payload.get("livescore") or []
 
     async def async_connect(self) -> dict:
         """Validate the configured key with a lightweight API request."""
@@ -274,15 +293,22 @@ class SportsDbApiClient:
     async def async_get_next_events(self, team_id: str) -> list[dict]:
         """Return the next five events for a team."""
         payload = await self._request("eventsnext.php", {"id": team_id})
-        return payload.get("eventsnext") or []
+        events = payload.get("eventsnext") or []
+        return sorted(events, key=_event_sort_key)
 
     async def async_get_previous_events(self, team_id: str) -> list[dict]:
         """Return the previous five events for a team."""
         payload = await self._request("eventslast.php", {"id": team_id})
-        return payload.get("results") or payload.get("events") or []
+        events = payload.get("results") or payload.get("events") or []
+        return sorted(events, key=_event_sort_key, reverse=True)
 
     async def async_get_data(self) -> dict:
         """Fetch Team Tracker-compatible data for configured teams."""
+        try:
+            live_scores = await self.async_get_live_scores()
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            live_scores = []
+
         teams = []
         for team_name in self._team_ids:
             team = await self.async_get_team(team_name)
@@ -293,6 +319,12 @@ class SportsDbApiClient:
             previous_events = (
                 await self.async_get_previous_events(team_id) if team_id else []
             )
+            live_events = [
+                event
+                for event in live_scores
+                if str(event.get("idHomeTeam")) == str(team_id)
+                or str(event.get("idAwayTeam")) == str(team_id)
+            ]
             teams.append(
                 {
                     **team,
@@ -300,6 +332,7 @@ class SportsDbApiClient:
                     "team_name": team.get("strTeam", team_name),
                     "next_events": next_events,
                     "previous_events": previous_events,
+                    "live_events": live_events,
                     "status": next_events[0].get("strStatus") if next_events else None,
                 }
             )

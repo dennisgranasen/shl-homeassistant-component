@@ -11,6 +11,7 @@ from custom_components.shl.api import (
     ShlApiClient,
     normalize_team_stats,
 )
+from custom_components.shl.sensor import flatten_event
 
 
 @pytest.mark.skip(reason="Legacy SHL OAuth API is no longer used")
@@ -214,7 +215,7 @@ async def test_sportsdb_client_returns_team_tracker_data():
             return self.payload
 
     class Session:
-        def get(self, url, params=None):
+        def get(self, url, params=None, **_kwargs):
             if url.endswith("searchteams.php"):
                 return Response(
                     {
@@ -263,7 +264,7 @@ async def test_sportsdb_client_prefers_djurgarden_hockey_team():
             return self.payload
 
     class Session:
-        def get(self, _url, params=None):
+        def get(self, _url, params=None, **_kwargs):
             if params["t"] == "Djurgården":
                 return Response(
                     {
@@ -325,3 +326,27 @@ async def test_sportsdb_client_supports_hockeyallsvenskan():
 
     assert team["idTeam"] == "137304"
     assert team["strLeague"] == "Swedish Hockey Allsvenskan"
+
+
+def test_flatten_event_exposes_team_tracker_fields():
+    """Flattened events should expose opponent, time, and score fields."""
+    event = {
+        "idEvent": "1",
+        "strEvent": "HV71 vs Djurgårdens IF",
+        "idHomeTeam": "135142",
+        "strHomeTeam": "HV71",
+        "idAwayTeam": "135139",
+        "strAwayTeam": "Djurgårdens IF",
+        "intHomeScore": "4",
+        "intAwayScore": "2",
+        "dateEvent": "2026-09-20",
+        "strTime": "18:00:00",
+        "strVenue": "Husqvarna Garden",
+    }
+
+    flattened = flatten_event({"idTeam": "135142"}, event, "next_game")
+
+    assert flattened["next_game_opponent"] == "Djurgårdens IF"
+    assert flattened["next_game_team_score"] == "4"
+    assert flattened["next_game_opponent_score"] == "2"
+    assert flattened["next_game_date"] == "2026-09-20"

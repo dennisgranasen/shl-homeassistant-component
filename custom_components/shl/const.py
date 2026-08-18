@@ -3,7 +3,7 @@
 NAME = "SHL"
 DOMAIN = "shl"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.0.2"
+VERSION = "1.0.0"
 
 ATTRIBUTION = "Data provided by http://www.thesportsdb.com/"
 ISSUE_URL = "https://github.com/dennisgranasen/shl-homeassistant-component/issues"

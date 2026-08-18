@@ -43,6 +43,10 @@ Enter:
 The integration searches TheSportsDB for each team name and refreshes the data
 every 30 seconds.
 
+Live in-game scores are requested from TheSportsDB v2 when available. This
+requires a Premium TheSportsDB API key. With the free v1 key, scheduled
+upcoming and previous events continue to work, but live scores are unavailable.
+
 ## Entities
 
 Each configured team is exposed as a sensor named like:
@@ -99,8 +103,8 @@ Do not commit `secrets.yaml`.
 ## Data source
 
 The integration uses TheSportsDB v1 endpoints for team search and team
-schedules. The free v1 key is not valid for TheSportsDB v2, which requires a
-Premium API key.
+schedules, plus the TheSportsDB v2 live-score endpoint when a Premium API key
+is configured. The free v1 key is not valid for v2 live scores.
 
 ## License
 

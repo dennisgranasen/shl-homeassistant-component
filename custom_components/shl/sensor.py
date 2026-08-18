@@ -6,6 +6,38 @@ from .const import SENSOR
 from .entity import ShlEntity
 
 
+def flatten_event(team: dict, event: dict | None, prefix: str) -> dict:
+    """Flatten one TheSportsDB event for Team Tracker-style consumers."""
+    if not event:
+        return {}
+
+    team_id = str(team.get("idTeam", ""))
+    home = str(event.get("idHomeTeam", "")) == team_id
+    opponent = event.get("strAwayTeam") if home else event.get("strHomeTeam")
+    opponent_id = event.get("idAwayTeam") if home else event.get("idHomeTeam")
+    opponent_logo = (
+        event.get("strAwayTeamBadge") if home else event.get("strHomeTeamBadge")
+    )
+    team_score = event.get("intHomeScore") if home else event.get("intAwayScore")
+    opponent_score = event.get("intAwayScore") if home else event.get("intHomeScore")
+    return {
+        prefix: event,
+        f"{prefix}_id": event.get("idEvent"),
+        f"{prefix}_name": event.get("strEvent"),
+        f"{prefix}_opponent": opponent,
+        f"{prefix}_opponent_id": opponent_id,
+        f"{prefix}_opponent_logo": opponent_logo,
+        f"{prefix}_homeaway": "home" if home else "away",
+        f"{prefix}_date": event.get("dateEventLocal") or event.get("dateEvent"),
+        f"{prefix}_time": event.get("strTimeLocal") or event.get("strTime"),
+        f"{prefix}_timestamp": event.get("strTimestamp"),
+        f"{prefix}_location": event.get("strVenue"),
+        f"{prefix}_status": event.get("strStatus"),
+        f"{prefix}_team_score": team_score,
+        f"{prefix}_opponent_score": opponent_score,
+    }
+
+
 async def async_setup_entry(hass, entry, async_add_devices):
     """Set up one sensor per configured SHL team."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
@@ -51,7 +83,18 @@ class ShlSensor(ShlEntity):
         team = self.team_data
         if not team:
             return "unknown"
-        return str(team.get("points", team.get("status", self._team_id)))
+        live_events = team.get("live_events") or []
+        next_events = team.get("next_events") or []
+        previous_events = team.get("previous_events") or []
+        event = live_events[0] if live_events else (next_events[0] if next_events else (
+            previous_events[0] if previous_events else {}
+        ))
+        status = str(event.get("strStatus", "")).casefold()
+        if status in {"match finished", "finished", "post", "ft"}:
+            return "POST"
+        if status in {"in progress", "live", "1h", "2h", "ot"}:
+            return "IN"
+        return "PRE"
 
     @property
     def extra_state_attributes(self):
@@ -71,6 +114,13 @@ class ShlSensor(ShlEntity):
             "integration": DOMAIN,
         }
         if team:
+            next_events = team.get("next_events") or []
+            previous_events = team.get("previous_events") or []
+            live_events = team.get("live_events") or []
+            event = live_events[0] if live_events else (next_events[0] if next_events else (
+                previous_events[0] if previous_events else {}
+            ))
+            current_fields = flatten_event(team, event, "current_game")
             attrs.update(
                 {
                     "position": team.get("position"),
@@ -85,8 +135,26 @@ class ShlSensor(ShlEntity):
                     "points": team.get("points"),
                     "last_5": team.get("last_5"),
                     "status": team.get("status"),
+                    "live_events": live_events,
+                    "team_logo": team.get("strBadge") or team.get("strLogo"),
+                    "league_logo": team.get("strLeagueBadge"),
+                    "team_url": team.get("strWebsite"),
+                    "opponent_name": current_fields.get("current_game_opponent"),
+                    "opponent_id": current_fields.get("current_game_opponent_id"),
+                    "opponent_logo": current_fields.get("current_game_opponent_logo"),
+                    "team_homeaway": current_fields.get("current_game_homeaway"),
+                    "date": current_fields.get("current_game_timestamp")
+                    or current_fields.get("current_game_date"),
+                    "event_id": current_fields.get("current_game_id"),
+                    "event_name": current_fields.get("current_game_name"),
+                    "venue": current_fields.get("current_game_location"),
+                    "location": event.get("strCity") or event.get("strCountry"),
+                    "team_score": current_fields.get("current_game_team_score"),
+                    "opponent_score": current_fields.get("current_game_opponent_score"),
                 }
             )
+            attrs.update(flatten_event(team, next_events[0] if next_events else None, "next_game"))
+            attrs.update(flatten_event(team, previous_events[0] if previous_events else None, "last_game"))
         return attrs
 
     @property
