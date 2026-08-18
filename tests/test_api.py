@@ -1,5 +1,7 @@
 """Tests for SHL api."""
 import asyncio
+from datetime import date
+from datetime import timedelta
 
 import aiohttp
 import pytest
@@ -12,6 +14,7 @@ from custom_components.shl.api import (
     normalize_team_stats,
 )
 from custom_components.shl.sensor import flatten_event
+from custom_components.shl.sensor import select_current_event
 
 
 @pytest.mark.skip(reason="Legacy SHL OAuth API is no longer used")
@@ -350,3 +353,29 @@ def test_flatten_event_exposes_team_tracker_fields():
     assert flattened["next_game_team_score"] == "4"
     assert flattened["next_game_opponent_score"] == "2"
     assert flattened["next_game_date"] == "2026-09-20"
+
+
+def test_select_current_event_keeps_today_final_visible():
+    """Today's final takes precedence over a future upcoming event."""
+    event, state = select_current_event(
+        {
+            "previous_events": [{"idEvent": "final", "dateEvent": date.today().isoformat()}],
+            "next_events": [{"idEvent": "next", "dateEvent": (date.today() + timedelta(days=1)).isoformat()}],
+        }
+    )
+
+    assert event["idEvent"] == "final"
+    assert state == "POST"
+
+
+def test_select_current_event_prioritizes_live_game():
+    """A live event takes precedence over both scheduled lists."""
+    event, state = select_current_event(
+        {
+            "live_events": [{"idEvent": "live"}],
+            "next_events": [{"idEvent": "next"}],
+        }
+    )
+
+    assert event["idEvent"] == "live"
+    assert state == "IN"
