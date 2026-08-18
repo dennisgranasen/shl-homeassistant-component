@@ -5,4 +5,4 @@ from custom_components.shl.const import (
 )
 
 
-MOCK_CONFIG = {CONF_API_KEY: "123", CONF_TEAM_IDS: ["HV71", "LHC"]}
+MOCK_CONFIG = {CONF_API_KEY: "123", CONF_TEAM_IDS: "HV71, LHC"}

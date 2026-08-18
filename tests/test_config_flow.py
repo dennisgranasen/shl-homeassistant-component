@@ -11,6 +11,9 @@ from custom_components.shl.const import (
     DOMAIN,
 )
 from custom_components.shl.const import (
+    CONF_TEAM_IDS,
+)
+from custom_components.shl.const import (
     PLATFORMS,
 )
 from custom_components.shl.const import (
@@ -61,7 +64,10 @@ async def test_successful_config_flow(hass, bypass_get_data):
     # the input data
     assert result["type"] == CREATE_ENTRY
     assert result["title"] == "TheSportsDB SHL"
-    assert result["data"] == MOCK_CONFIG
+    assert result["data"] == {
+        **MOCK_CONFIG,
+        CONF_TEAM_IDS: ["HV71", "LHC"],
+    }
     assert result["result"]
 
 

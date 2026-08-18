@@ -43,6 +43,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     api_key = entry.data.get(CONF_API_KEY) or entry.data.get("client_secret") or entry.data.get("client_id")
     team_ids = entry.data.get(CONF_TEAM_IDS)
+    if isinstance(team_ids, str):
+        team_ids = [team.strip() for team in team_ids.split(",") if team.strip()]
 
     session = async_get_clientsession(hass)
     client = ShlApiClient(api_key, team_ids, session)

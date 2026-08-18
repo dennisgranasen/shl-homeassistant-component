@@ -24,6 +24,13 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
         self._errors = {}
 
+        if user_input is not None:
+            team_ids = user_input.get(CONF_TEAM_IDS, "")
+            if isinstance(team_ids, str):
+                user_input[CONF_TEAM_IDS] = [
+                    team.strip() for team in team_ids.split(",") if team.strip()
+                ]
+
         # Uncomment the next 2 lines if only a single instance of the integration is allowed:
         # if self._async_current_entries():
         #     return self.async_abort(reason="single_instance_allowed")
@@ -55,7 +62,7 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_API_KEY): str,
-                    vol.Required(CONF_TEAM_IDS): [str],
+                    vol.Required(CONF_TEAM_IDS): str,
                 }
             ),
             errors=self._errors,
