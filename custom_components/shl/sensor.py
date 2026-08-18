@@ -139,6 +139,8 @@ class ShlSensor(ShlEntity):
             "integration": DOMAIN,
         }
         if team:
+            next_events = team.get("next_events") or []
+            previous_events = team.get("previous_events") or []
             event, _ = select_current_event(team)
             live_events = team.get("live_events") or []
             current_fields = flatten_event(team, event, "current_game")
