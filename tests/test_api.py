@@ -222,18 +222,18 @@ async def test_sportsdb_client_returns_team_tracker_data():
             if url.endswith("searchteams.php"):
                 return Response(
                     {
-            "teams": [
-                {
-                    "idTeam": "135142",
-                    "strTeam": "HV71",
-                    "strSport": "Ice Hockey",
-                    "strLeague": "Swedish Hockey League",
-                }
-            ]
+                        "teams": [
+                            {
+                                "idTeam": "135142",
+                                "strTeam": "HV71",
+                                "strSport": "Ice Hockey",
+                                "strLeague": "Swedish Hockey League",
+                            }
+                        ]
                     }
                 )
             if url.endswith("eventsnext.php"):
-                return Response({"eventsnext": [{"strStatus": "Not Started"}]})
+                return Response({"events": [{"strStatus": "Not Started"}]})
             return Response({"results": [{"strStatus": "Match Finished"}]})
 
     client = SportsDbApiClient("123", ["HV71"], Session())

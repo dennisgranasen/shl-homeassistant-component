@@ -103,7 +103,10 @@ class ShlSensor(ShlEntity):
         body = self.coordinator.data.get("body", [])
         if isinstance(body, list):
             for team in body:
-                if isinstance(team, dict) and team.get("team") == self._team_id:
+                if isinstance(team, dict) and (
+                    team.get("requested_team", "").casefold() == self._team_id.casefold()
+                    or team.get("team", "").casefold() == self._team_id.casefold()
+                ):
                     return team
             return body[0] if body else {}
         if isinstance(body, dict):

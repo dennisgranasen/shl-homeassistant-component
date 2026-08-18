@@ -293,7 +293,7 @@ class SportsDbApiClient:
     async def async_get_next_events(self, team_id: str) -> list[dict]:
         """Return the next five events for a team."""
         payload = await self._request("eventsnext.php", {"id": team_id})
-        events = payload.get("eventsnext") or []
+        events = payload.get("eventsnext") or payload.get("events") or []
         return sorted(events, key=_event_sort_key)
 
     async def async_get_previous_events(self, team_id: str) -> list[dict]:
@@ -328,6 +328,7 @@ class SportsDbApiClient:
             teams.append(
                 {
                     **team,
+                    "requested_team": team_name,
                     "team": team.get("strTeam", team_name),
                     "team_name": team.get("strTeam", team_name),
                     "next_events": next_events,
