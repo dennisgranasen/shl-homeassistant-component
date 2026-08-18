@@ -106,7 +106,8 @@ class ShlSensor(ShlEntity):
             "team_id": team.get("idTeam"),
             "team_abbr": team.get("strTeamShort", self._team_id),
             "league": team.get("strLeague"),
-            "sport": team.get("strSport", "Ice Hockey"),
+            "league_name": team.get("strLeague"),
+            "sport": "hockey" if team.get("strSport") == "Ice Hockey" else team.get("strSport", "hockey"),
             "logo": team.get("strBadge") or team.get("strLogo"),
             "team_logo": team.get("strLogo"),
             "badge": team.get("strBadge"),
@@ -143,6 +144,11 @@ class ShlSensor(ShlEntity):
                     "opponent_id": current_fields.get("current_game_opponent_id"),
                     "opponent_logo": current_fields.get("current_game_opponent_logo"),
                     "team_homeaway": current_fields.get("current_game_homeaway"),
+                    "opponent_homeaway": (
+                        "away"
+                        if current_fields.get("current_game_homeaway") == "home"
+                        else "home"
+                    ),
                     "date": current_fields.get("current_game_timestamp")
                     or current_fields.get("current_game_date"),
                     "event_id": current_fields.get("current_game_id"),

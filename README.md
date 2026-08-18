@@ -106,6 +106,11 @@ The integration uses TheSportsDB v1 endpoints for team search and team
 schedules, plus the TheSportsDB v2 live-score endpoint when a Premium API key
 is configured. The free v1 key is not valid for v2 live scores.
 
+## Brand assets
+
+The Home Assistant integration icon and logo are based on the Swedish Hockey
+League logo from [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Swedish_Hockey_League_logo.svg).
+
 ## License
 
 See [LICENSE](LICENSE).
