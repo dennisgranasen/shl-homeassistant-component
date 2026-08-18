@@ -114,3 +114,8 @@ League logo from [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Swe
 ## License
 
 See [LICENSE](LICENSE).
+
+
+## Disclaimer
+
+Live scores have not yet been tested. A premium subscription is needed from data provider.
