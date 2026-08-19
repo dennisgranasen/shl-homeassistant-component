@@ -4,7 +4,6 @@ import logging
 import socket
 
 from datetime import datetime
-from datetime import timedelta
 import aiohttp
 import async_timeout
 
@@ -57,9 +56,9 @@ class ShlApiClient:
                 'grant_type': 'client_credentials'}
         headers = {'User-Agent': f"{NAME}/{VERSION}"}
         body = await self.api_wrapper("post", f"{BASE_URL}{AUTH}", data=form, headers=headers)
-        self._expires = datetime.now() + timedelta(seconds=int(body["expires_in"]))
+        self._expires = datetime.now() + int(body['expires_in'])
         self._headers = HEADERS.copy()
-        self._headers["Authorization"] = f"Bearer {body['access_token']}"
+        self._headers['Authorization'] = "Bearer " + body['access_token']
         return body
 
     def is_connected(self) -> bool:
@@ -73,7 +72,7 @@ class ShlApiClient:
 
     async def async_get_articles(self, team_ids: list[str]) -> dict:
         """Fetch the latest articles on the subscribed teams"""
-        url = ShlApiClient.generate_url("articles.json")
+        url = ShlApiClient.generate_url("articles")
         if team_ids:
             params = {'teamIds': ",".join(team_ids)}
             return await self.api_wrapper("get", url, params=params)
@@ -81,7 +80,7 @@ class ShlApiClient:
 
     async def async_get_games(self, season: int, team_ids: list[str]) -> dict:
         """Fetch the latest matches from SHL"""
-        url = ShlApiClient.generate_url("games.json", season)
+        url = ShlApiClient.generate_url("games", season)
         if team_ids:
             params = {'teamIds': ",".join(self._team_ids)}
             return await self.api_wrapper("get", url, params=params)
@@ -160,10 +159,10 @@ class ShlApiClient:
         self, method: str, url: str, data: dict = {}, headers: dict = {}, params: dict = {}
     ) -> dict:
         """Get information from the API."""
-        if not headers and not self.is_connected():
-            await self.async_connect()
+        if not headers and not self.is_connected:
+            self.connect()
         try:
-            async with async_timeout.timeout(TIMEOUT):
+            async with async_timeout.timeout(TIMEOUT, loop=asyncio.get_event_loop()):  # pylint: disable=unexpected-keyword-arg
                 if method == "get":
                     response = await self._session.get(url,
                                                        headers=headers or self._headers,
@@ -183,13 +182,10 @@ class ShlApiClient:
                                               params=params)
 
                 elif method == "post":
-                    response = await self._session.post(
-                        url,
-                        headers=headers or self._headers,
-                        json=data,
-                        params=params,
-                    )
-                    return await response.json()
+                    await self._session.post(url,
+                                             headers=headers or self._headers,
+                                             json=data,
+                                             params=params)
 
         except asyncio.TimeoutError as exception:
             _LOGGER.error(
@@ -212,132 +208,3 @@ class ShlApiClient:
             )
         except Exception as exception:  # pylint: disable=broad-except
             _LOGGER.error("Something really wrong happened! - %s", exception)
-
-
-SPORTSDB_BASE_URL = "https://www.thesportsdb.com/api/v1/json"
-SPORTSDB_V2_BASE_URL = "https://www.thesportsdb.com/api/v2/json"
-TEAM_ALIASES = {
-    "djurgården": "Djurgårdens IF",
-    "skellefteå": "Skellefteå AIK",
-    "växjö": "Växjö Lakers",
-    "örebro": "Örebro HK",
-}
-SUPPORTED_LEAGUES = {"Swedish Hockey League", "Swedish Hockey Allsvenskan"}
-
-
-def _event_sort_key(event: dict) -> str:
-    """Return a sortable timestamp for a TheSportsDB event."""
-    return event.get("strTimestamp") or (
-        f"{event.get('dateEvent', '')}T{event.get('strTime', '')}"
-    )
-
-
-class SportsDbApiClient:
-    """Access SHL team and schedule data from TheSportsDB v1 API."""
-
-    def __init__(
-        self, api_key: str, team_ids: list[str], session: aiohttp.ClientSession
-    ) -> None:
-        self._api_key = api_key
-        self._team_ids = team_ids or []
-        self._session = session
-
-    def _url(self, endpoint: str) -> str:
-        return f"{SPORTSDB_BASE_URL}/{self._api_key}/{endpoint}"
-
-    async def _request(self, endpoint: str, params: dict | None = None) -> dict:
-        async with async_timeout.timeout(TIMEOUT):
-            async with self._session.get(self._url(endpoint), params=params) as response:
-                response.raise_for_status()
-                return await response.json()
-
-    async def async_get_live_scores(self) -> list[dict]:
-        """Return current ice hockey scores from the Premium v2 API."""
-        url = f"{SPORTSDB_V2_BASE_URL}/livescore/Ice%20Hockey"
-        async with async_timeout.timeout(TIMEOUT):
-            async with self._session.get(
-                url, headers={"X-API-KEY": self._api_key}
-            ) as response:
-                response.raise_for_status()
-                payload = await response.json()
-        return payload.get("livescore") or []
-
-    async def async_connect(self) -> dict:
-        """Validate the configured key with a lightweight API request."""
-        return await self._request("all_sports.php")
-
-    async def async_get_team(self, team_name: str) -> dict:
-        """Find a team by name."""
-        search_names = [team_name]
-        alias = TEAM_ALIASES.get(team_name.casefold())
-        if alias:
-            search_names.append(alias)
-        if not alias:
-            search_names.append(f"{team_name} IF")
-
-        for search_name in search_names:
-            payload = await self._request("searchteams.php", {"t": search_name})
-            teams = payload.get("teams") or []
-            shl_teams = [
-                team
-                for team in teams
-                if team.get("strLeague") in SUPPORTED_LEAGUES
-            ]
-            for team in shl_teams:
-                if team.get("strTeam", "").casefold() == search_name.casefold():
-                    return team
-            if shl_teams:
-                return shl_teams[0]
-        return {}
-
-    async def async_get_next_events(self, team_id: str) -> list[dict]:
-        """Return the next five events for a team."""
-        payload = await self._request("eventsnext.php", {"id": team_id})
-        events = payload.get("eventsnext") or payload.get("events") or []
-        return sorted(events, key=_event_sort_key)
-
-    async def async_get_previous_events(self, team_id: str) -> list[dict]:
-        """Return the previous five events for a team."""
-        payload = await self._request("eventslast.php", {"id": team_id})
-        events = payload.get("results") or payload.get("events") or []
-        return sorted(events, key=_event_sort_key, reverse=True)
-
-    async def async_get_data(self) -> dict:
-        """Fetch Team Tracker-compatible data for configured teams."""
-        try:
-            live_scores = await self.async_get_live_scores()
-        except (aiohttp.ClientError, asyncio.TimeoutError):
-            live_scores = []
-
-        teams = []
-        for team_name in self._team_ids:
-            team = await self.async_get_team(team_name)
-            if not team:
-                continue
-            team_id = team.get("idTeam")
-            next_events = await self.async_get_next_events(team_id) if team_id else []
-            previous_events = (
-                await self.async_get_previous_events(team_id) if team_id else []
-            )
-            live_events = [
-                event
-                for event in live_scores
-                if str(event.get("idHomeTeam")) == str(team_id)
-                or str(event.get("idAwayTeam")) == str(team_id)
-            ]
-            teams.append(
-                {
-                    **team,
-                    "requested_team": team_name,
-                    "team": team.get("strTeam", team_name),
-                    "team_name": team.get("strTeam", team_name),
-                    "next_events": next_events,
-                    "previous_events": previous_events,
-                    "live_events": live_events,
-                    "status": next_events[0].get("strStatus") if next_events else None,
-                }
-            )
-
-        if len(teams) == 1:
-            return {"team": teams[0], "teams": teams, "body": teams[0]}
-        return {"teams": teams, "body": teams}

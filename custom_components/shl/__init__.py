@@ -9,23 +9,22 @@ import logging
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import Config
 from homeassistant.core import HomeAssistant
-from homeassistant.core_config import Config
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
-from .api import SportsDbApiClient
-from .const import CONF_API_KEY
+from .api import ShlApiClient
+from .const import CONF_CLIENT_ID
+from .const import CONF_CLIENT_SECRET
 from .const import CONF_TEAM_IDS
 from .const import DOMAIN
 from .const import PLATFORMS
 from .const import STARTUP_MESSAGE
 
 SCAN_INTERVAL = timedelta(seconds=30)
-
-ShlApiClient = SportsDbApiClient
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
@@ -41,13 +40,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data.setdefault(DOMAIN, {})
         _LOGGER.info(STARTUP_MESSAGE)
 
-    api_key = entry.data.get(CONF_API_KEY) or entry.data.get("client_secret") or entry.data.get("client_id")
+    cid = entry.data.get(CONF_CLIENT_ID)
+    csec = entry.data.get(CONF_CLIENT_SECRET)
     team_ids = entry.data.get(CONF_TEAM_IDS)
-    if isinstance(team_ids, str):
-        team_ids = [team.strip() for team in team_ids.split(",") if team.strip()]
 
     session = async_get_clientsession(hass)
-    client = ShlApiClient(api_key, team_ids, session)
+    client = ShlApiClient(cid, csec, team_ids, session)
 
     coordinator = ShlDataUpdateCoordinator(hass, client=client)
     await coordinator.async_refresh()
@@ -71,7 +69,7 @@ class ShlDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass: HomeAssistant,
-        client: SportsDbApiClient,
+        client: ShlApiClient,
     ) -> None:
         """Initialize."""
         self.api = client

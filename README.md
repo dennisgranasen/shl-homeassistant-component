@@ -119,3 +119,5 @@ See [LICENSE](LICENSE).
 ## Disclaimer
 
 Live scores have not yet been tested. A premium subscription is needed from data provider.
+Compatibility with [HA Team Tracker Card](https://github.com/vasqued2/ha-teamtracker-card) is not guaranteed. 
+Current version (v2026) is compatible with Team Tracker Card 0.17.
