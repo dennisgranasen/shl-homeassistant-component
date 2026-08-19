@@ -63,7 +63,7 @@ class ShlApiClient:
         body = await self.api_wrapper("post", f"{BASE_URL}{AUTH}", data=form, headers=headers)
         self._expires = datetime.now() + timedelta(seconds=int(body["expires_in"]))
         self._headers = HEADERS.copy()
-        self._headers["Authorization"] = f"******'access_token']}"
+        self._headers["Authorization"] = "Bearer " + body["access_token"]
         return body
 
     def is_connected(self) -> bool:

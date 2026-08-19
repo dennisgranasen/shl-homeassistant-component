@@ -2,10 +2,10 @@
   "config": {
     "step": {
       "user": {
-        "description": "Entrez votre clé API TheSportsDB et le nom de l'équipe à suivre. Utilisez 123 comme clé API si vous n'en avez pas.",
+        "description": "Entrez votre clé API TheSportsDB et le nom de l'équipe à suivre. Utilisez 123 comme clé API si vous n'en avez pas. Vous pouvez aussi saisir le nom d'une équipe nationale, par exemple 'Sweden' ou 'Tre Kronor'.",
         "data": {
           "api_key": "Clé API TheSportsDB",
-          "team_name": "Nom de l'équipe (ex. Rögle BK, Djurgården, Arsenal)"
+          "team_name": "Nom de l'équipe (ex. Rögle BK, Djurgården, Sweden, Arsenal)"
         }
       },
       "pick_sport": {
@@ -21,7 +21,7 @@
         }
       },
       "league": {
-        "description": "Choisissez les compétitions à inclure pour cette équipe.",
+        "description": "Choisissez les compétitions à inclure pour cette équipe. Les équipes nationales ne disputent que des compétitions internationales ; l'option 'Ligues et coupes nationales uniquement' n'est donc pas disponible pour elles.",
         "data": {
           "league_filter": "Filtre de ligue",
           "specific_league": "Ligue spécifique (uniquement si 'Ligue spécifique' est sélectionné ci-dessus)"

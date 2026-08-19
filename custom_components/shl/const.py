@@ -26,6 +26,7 @@ CONF_TEAM_IDS = "team_ids"
 CONF_SPORT = "sport"
 CONF_LEAGUE_FILTER = "league_filter"
 CONF_SPECIFIC_LEAGUE = "specific_league"
+CONF_IS_NATIONAL_TEAM = "is_national_team"
 
 # League filter values
 LEAGUE_FILTER_ALL = "all"

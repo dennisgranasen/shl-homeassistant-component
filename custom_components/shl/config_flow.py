@@ -7,6 +7,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api import SportsDbApiClient
 from .const import (
     CONF_API_KEY,
+    CONF_IS_NATIONAL_TEAM,
     CONF_TEAM_IDS,
     CONF_SPORT,
     CONF_LEAGUE_FILTER,
@@ -152,6 +153,8 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_league(self, user_input=None):
         """Let the user choose a league filter for the team."""
+        is_national = _is_national_team(self._selected_team)
+
         if user_input is not None:
             league_filter = user_input[CONF_LEAGUE_FILTER]
             specific_league = user_input.get(CONF_SPECIFIC_LEAGUE) or None
@@ -165,6 +168,7 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_SPORT: sport,
                 CONF_LEAGUE_FILTER: league_filter,
                 CONF_SPECIFIC_LEAGUE: specific_league,
+                CONF_IS_NATIONAL_TEAM: is_national,
             }
             return self.async_create_entry(title=team_name, data=data)
 
@@ -183,8 +187,11 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         filter_options = {
             LEAGUE_FILTER_ALL: "All leagues (including international)",
-            LEAGUE_FILTER_NATIONAL: "National leagues and cups only",
         }
+        # National teams only compete internationally – hiding "national leagues only"
+        # prevents a confusing option that would show nothing for e.g. Tre Kronor.
+        if not is_national:
+            filter_options[LEAGUE_FILTER_NATIONAL] = "National leagues and cups only"
         if leagues:
             filter_options[LEAGUE_FILTER_SPECIFIC] = "Specific league"
 
@@ -257,3 +264,17 @@ def _team_label(team: dict) -> str:
     parts = [p for p in [sport, league] if p]
     suffix = f" ({', '.join(parts)})" if parts else ""
     return f"{name}{suffix}"
+
+
+def _is_national_team(team: dict) -> bool:
+    """Return True if the team is a national team.
+
+    TheSportsDB marks national teams with ``strType`` equal to ``"National"``.
+    As a fallback the league name is also checked for common national-team
+    competitions so that the detection works even when ``strType`` is absent.
+    """
+    if (team.get("strType") or "").casefold() == "national":
+        return True
+    national_keywords = ("world championship", "olympic", "nations league", "world cup")
+    league = (team.get("strLeague") or "").casefold()
+    return any(kw in league for kw in national_keywords)

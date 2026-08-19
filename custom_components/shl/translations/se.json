@@ -2,10 +2,10 @@
   "config": {
     "step": {
       "user": {
-        "description": "Ange din TheSportsDB API-nyckel och lagnamnet du vill följa. Använd 123 som API-nyckel om du inte har en.",
+        "description": "Ange din TheSportsDB API-nyckel och lagnamnet du vill följa. Använd 123 som API-nyckel om du inte har en. Du kan också ange ett landslags namn, t.ex. 'Sweden' eller 'Tre Kronor'.",
         "data": {
           "api_key": "TheSportsDB API-nyckel",
-          "team_name": "Lagnamn (t.ex. Rögle BK, Djurgården, Arsenal)"
+          "team_name": "Lagnamn (t.ex. Rögle BK, Djurgården, Sweden, Arsenal)"
         }
       },
       "pick_sport": {
@@ -21,7 +21,7 @@
         }
       },
       "league": {
-        "description": "Välj vilka tävlingar som ska inkluderas för det här laget.",
+        "description": "Välj vilka tävlingar som ska inkluderas för det här laget. Landslag spelar bara internationella tävlingar, så alternativet 'Endast nationella ligor och cuper' visas inte för dem.",
         "data": {
           "league_filter": "Ligafilter",
           "specific_league": "Specifik liga (väljs bara när 'Specifik liga' är markerat ovan)"

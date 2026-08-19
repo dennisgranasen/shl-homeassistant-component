@@ -2,10 +2,10 @@
   "config": {
     "step": {
       "user": {
-        "description": "Enter your TheSportsDB API key and the team name to track. Use 123 as the API key if you do not have one.",
+        "description": "Enter your TheSportsDB API key and the team name to track. Use 123 as the API key if you do not have one. You can also enter a national team name such as 'Sweden' or 'Tre Kronor'.",
         "data": {
           "api_key": "TheSportsDB API key",
-          "team_name": "Team name (e.g. Rögle BK, Djurgården, Arsenal)"
+          "team_name": "Team name (e.g. Rögle BK, Djurgården, Sweden, Arsenal)"
         }
       },
       "pick_sport": {
@@ -21,7 +21,7 @@
         }
       },
       "league": {
-        "description": "Choose which competitions to include for this team.",
+        "description": "Choose which competitions to include for this team. National teams only have international competitions, so 'National leagues and cups only' is not available for them.",
         "data": {
           "league_filter": "League filter",
           "specific_league": "Specific league (only when 'Specific league' is selected above)"
