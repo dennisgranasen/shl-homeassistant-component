@@ -1,12 +1,21 @@
-# SHL Home Assistant Integration
+# TheSportsDb Team Tracker Integration for Home Assistant
 
-Home Assistant custom integration for Swedish hockey teams in the Swedish
-Hockey League and Swedish Hockey Allsvenskan, powered by
-[TheSportsDB v1](https://www.thesportsdb.com/api/spec/v1/openapi.yaml).
+Home Assistant custom integration for teams found in [TheSportsDB](https://www.thesportsdb.com/).
+This started as an integration for hockey teams in the Swedish
+Hockey League and Allsvenskan, but then escalated to support many more sports 
+and leagues. Basically, if you can find your team in their database, then it is
+supported by this integration.
 
 The integration creates one sensor for each configured team and exposes team
 metadata plus upcoming and previous events as state attributes. It is intended
 for Team Tracker-style dashboards and cards.
+
+
+NB. This integration was created to follow the format required by the 
+excellent [Team tracker card](https://github.com/vasqued2/ha-teamtracker-card).
+Currently, this card supports several sports, but not all in the SportsDb, so while
+the integration will work for any sport - it is not certain that the Team Tracker Card
+can be used for your team unless it is one of the sports officially supported by the Card.
 
 ## Installation
 
@@ -14,7 +23,7 @@ for Team Tracker-style dashboards and cards.
 
 1. Open HACS in Home Assistant.
 2. Add this repository as a custom repository of type **Integration**.
-3. Install **SHL**.
+3. Install **TheSportsDb team tracker**.
 4. Restart Home Assistant.
 
 ### Manual
@@ -32,13 +41,13 @@ config/custom_components/shl/manifest.json
 ## Configuration
 
 Configuration is performed from **Settings -> Devices & services -> Add
-Integration -> SHL**.
+Integration -> TheSportsDb Team Tracker**.
 
 Enter:
 
 - **TheSportsDB API key**: `123` is the free v1 test key. Use your own key if
   you have one.
-- **SHL team names**: one or more team names, for example `HV71` and `Lulea`.
+- **Team names**: one or more team names, for example `HV71` and `Lulea`.
 
 The integration searches TheSportsDB for each team name and refreshes the data
 every 30 seconds.
