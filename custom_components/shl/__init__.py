@@ -19,7 +19,11 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 from .api import SportsDbApiClient
 from .const import CONF_API_KEY
 from .const import CONF_TEAM_IDS
+from .const import CONF_SPORT
+from .const import CONF_LEAGUE_FILTER
+from .const import CONF_SPECIFIC_LEAGUE
 from .const import DOMAIN
+from .const import LEAGUE_FILTER_ALL
 from .const import PLATFORMS
 from .const import STARTUP_MESSAGE
 
@@ -46,8 +50,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     if isinstance(team_ids, str):
         team_ids = [team.strip() for team in team_ids.split(",") if team.strip()]
 
+    sport = entry.data.get(CONF_SPORT)
+    league_filter = entry.data.get(CONF_LEAGUE_FILTER, LEAGUE_FILTER_ALL)
+    specific_league = entry.data.get(CONF_SPECIFIC_LEAGUE)
+
     session = async_get_clientsession(hass)
-    client = ShlApiClient(api_key, team_ids, session)
+    client = ShlApiClient(api_key, team_ids, session, sport=sport,
+                          league_filter=league_filter, specific_league=specific_league)
 
     coordinator = ShlDataUpdateCoordinator(hass, client=client)
     await coordinator.async_refresh()

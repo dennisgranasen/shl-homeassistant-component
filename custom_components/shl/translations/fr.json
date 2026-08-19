@@ -2,15 +2,35 @@
   "config": {
     "step": {
       "user": {
-        "description": "Si vous avez besoin d'aide pour la configuration, regardez ici: https://github.com/dennisgranasen/shl-homeassistant-component",
+        "description": "Entrez votre clé API TheSportsDB et le nom de l'équipe à suivre. Utilisez 123 comme clé API si vous n'en avez pas. Vous pouvez aussi saisir le nom d'une équipe nationale, par exemple 'Sweden' ou 'Tre Kronor'.",
         "data": {
-          "api_key": "Clé API TheSportsDB (utilisez 123 si vous n'en avez pas)",
-          "team_ids": "Noms des équipes de hockey suédois"
+          "api_key": "Clé API TheSportsDB",
+          "team_name": "Nom de l'équipe (ex. Rögle BK, Djurgården, Sweden, Arsenal)"
+        }
+      },
+      "pick_sport": {
+        "description": "Plusieurs sports correspondent à ce nom d'équipe. Veuillez sélectionner le sport.",
+        "data": {
+          "sport": "Sport"
+        }
+      },
+      "pick_team": {
+        "description": "Plusieurs équipes ont été trouvées. Veuillez sélectionner la bonne.",
+        "data": {
+          "team": "Équipe"
+        }
+      },
+      "league": {
+        "description": "Choisissez les compétitions à inclure pour cette équipe. Les équipes nationales ne disputent que des compétitions internationales ; l'option 'Ligues et coupes nationales uniquement' n'est donc pas disponible pour elles.",
+        "data": {
+          "league_filter": "Filtre de ligue",
+          "specific_league": "Ligue spécifique (uniquement si 'Ligue spécifique' est sélectionné ci-dessus)"
         }
       }
     },
     "error": {
-      "auth": "Identifiant ou mot de passe erroné."
+      "auth": "Clé API invalide.",
+      "team_not_found": "Aucune équipe trouvée avec ce nom. Essayez une autre orthographe."
     },
     "abort": {
       "single_instance_allowed": "Une seule instance est autorisée."

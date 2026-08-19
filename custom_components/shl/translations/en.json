@@ -2,15 +2,35 @@
   "config": {
     "step": {
       "user": {
-        "description": "If you need help with the configuration have a look here: https://github.com/dennisgranasen/shl-homeassistant-component",
+        "description": "Enter your TheSportsDB API key and the team name to track. Use 123 as the API key if you do not have one. You can also enter a national team name such as 'Sweden' or 'Tre Kronor'.",
         "data": {
-          "api_key": "TheSportsDB API key (use 123 if you don't have one)",
-          "team_ids": "Swedish hockey team names (comma-separated)"
+          "api_key": "TheSportsDB API key",
+          "team_name": "Team name (e.g. Rögle BK, Djurgården, Sweden, Arsenal)"
+        }
+      },
+      "pick_sport": {
+        "description": "Multiple sports matched that team name. Please select the sport.",
+        "data": {
+          "sport": "Sport"
+        }
+      },
+      "pick_team": {
+        "description": "Multiple teams were found. Please select the correct one.",
+        "data": {
+          "team": "Team"
+        }
+      },
+      "league": {
+        "description": "Choose which competitions to include for this team. National teams only have international competitions, so 'National leagues and cups only' is not available for them.",
+        "data": {
+          "league_filter": "League filter",
+          "specific_league": "Specific league (only when 'Specific league' is selected above)"
         }
       }
     },
     "error": {
-      "auth": "Username/Password is wrong."
+      "auth": "Invalid API key.",
+      "team_not_found": "No team found with that name. Try a different spelling."
     },
     "abort": {
       "single_instance_allowed": "Only a single instance is allowed."

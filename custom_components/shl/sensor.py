@@ -39,6 +39,7 @@ def flatten_event(team: dict, event: dict | None, prefix: str) -> dict:
         prefix: event,
         f"{prefix}_id": event.get("idEvent"),
         f"{prefix}_name": event.get("strEvent"),
+        f"{prefix}_league": event.get("strLeague"),
         f"{prefix}_opponent": opponent,
         f"{prefix}_opponent_id": opponent_id,
         f"{prefix}_opponent_logo": opponent_logo,

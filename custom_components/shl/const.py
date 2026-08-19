@@ -23,9 +23,72 @@ PLATFORMS = [SENSOR]
 CONF_ENABLED = "enabled"
 CONF_API_KEY = "api_key"
 CONF_TEAM_IDS = "team_ids"
+CONF_SPORT = "sport"
+CONF_LEAGUE_FILTER = "league_filter"
+CONF_SPECIFIC_LEAGUE = "specific_league"
+CONF_IS_NATIONAL_TEAM = "is_national_team"
+
+# League filter values
+LEAGUE_FILTER_ALL = "all"
+LEAGUE_FILTER_NATIONAL = "national"
+LEAGUE_FILTER_SPECIFIC = "specific"
 
 # Defaults
 DEFAULT_NAME = DOMAIN
+
+
+# Leagues to always block (Russian and Belarusian leagues)
+BLOCKED_LEAGUES: set[str] = {
+    "KHL",
+    "Kontinental Hockey League",
+    "VHL",
+    "Russian Hockey League",
+    "MHL",
+    "Molodiozhnaya Hockey League",
+    "Belarus Extraleague",
+    "Belarusian Extraleague",
+    "Extraleague Belarus",
+}
+
+# International/European-level competitions (filtered out when LEAGUE_FILTER_NATIONAL is chosen)
+INTERNATIONAL_LEAGUES: set[str] = {
+    # Hockey
+    "Champions Hockey League",
+    "CHL",
+    "IIHF World Championship",
+    "IIHF World Junior Championship",
+    "IIHF Women's World Championship",
+    "Olympic Games",
+    "Winter Olympics",
+    # Football
+    "UEFA Champions League",
+    "UEFA Europa League",
+    "UEFA Conference League",
+    "FIFA World Cup",
+    "UEFA European Championship",
+    "UEFA Nations League",
+    "FIFA World Cup Qualification",
+    "UEFA Euro Qualification",
+    "Copa America",
+    "CONCACAF Gold Cup",
+    "AFC Asian Cup",
+    "Africa Cup of Nations",
+    # Basketball
+    "EuroLeague",
+    "EuroCup Basketball",
+    "NBA",
+    "FIBA Basketball World Cup",
+    "EuroBasket",
+    # Handball
+    "EHF Champions League",
+    "EHF European League",
+    "IHF World Men's Handball Championship",
+    "IHF World Women's Handball Championship",
+    # Volleyball
+    "CEV Champions League",
+    "CEV EuroVolley",
+    "FIVB Volleyball World Championship",
+}
 
 
 STARTUP_MESSAGE = f"""

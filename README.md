@@ -43,6 +43,15 @@ Enter:
 The integration searches TheSportsDB for each team name and refreshes the data
 every 30 seconds.
 
+### National teams (Landslag)
+
+National teams such as **Tre Kronor** (search for `Sweden` or `Tre Kronor`) are
+fully supported. Since national teams only compete in international competitions
+(IIHF World Championship, Olympics, etc.) the *National leagues and cups only*
+filter option is intentionally not available when a national team is detected.
+Use **All leagues** (default) or **Specific league** to select a particular
+tournament like the IIHF World Championship.
+
 Live in-game scores are requested from TheSportsDB v2 when available. This
 requires a Premium TheSportsDB API key. With the free v1 key, scheduled
 upcoming and previous events continue to work, but live scores are unavailable.
