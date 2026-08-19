@@ -14,6 +14,7 @@ from .const import BLOCKED_LEAGUES
 from .const import INTERNATIONAL_LEAGUES
 from .const import LEAGUE_FILTER_ALL
 from .const import LEAGUE_FILTER_NATIONAL
+from .const import LEAGUE_FILTER_SPECIFIC
 
 TIMEOUT = 10
 
@@ -194,7 +195,7 @@ def _filter_events(
             continue
         if league_filter == LEAGUE_FILTER_NATIONAL and _is_international(league):
             continue
-        if league_filter == "specific" and specific_league:
+        if league_filter == LEAGUE_FILTER_SPECIFIC and specific_league:
             if league.casefold() != specific_league.casefold():
                 continue
         result.append(event)
@@ -324,7 +325,7 @@ class SportsDbApiClient:
         result = [e for e in live_scores if not _is_blocked(e.get("strLeague") or "")]
         if self._league_filter == LEAGUE_FILTER_NATIONAL:
             result = [e for e in result if not _is_international(e.get("strLeague") or "")]
-        elif self._league_filter == "specific" and self._specific_league:
+        elif self._league_filter == LEAGUE_FILTER_SPECIFIC and self._specific_league:
             result = [
                 e for e in result
                 if (e.get("strLeague") or "").casefold() == self._specific_league.casefold()

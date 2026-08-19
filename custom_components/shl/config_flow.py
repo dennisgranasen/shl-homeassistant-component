@@ -14,6 +14,7 @@ from .const import (
     DOMAIN,
     LEAGUE_FILTER_ALL,
     LEAGUE_FILTER_NATIONAL,
+    LEAGUE_FILTER_SPECIFIC,
     PLATFORMS,
 )
 
@@ -185,7 +186,7 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             LEAGUE_FILTER_NATIONAL: "National leagues and cups only",
         }
         if leagues:
-            filter_options["specific"] = "Specific league"
+            filter_options[LEAGUE_FILTER_SPECIFIC] = "Specific league"
 
         schema_dict = {
             vol.Required(CONF_LEAGUE_FILTER, default=LEAGUE_FILTER_ALL): vol.In(filter_options),
