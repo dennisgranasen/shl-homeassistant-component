@@ -1,5 +1,5 @@
 """
-Custom integration to integrate SHL with Home Assistant.
+Custom integration to integrate TheSportsDB with Home Assistant.
 
 For more details about this integration, please refer to
 https://github.com/dennisgranasen/shl-homeassistant-component
@@ -29,8 +29,6 @@ from .const import STARTUP_MESSAGE
 
 SCAN_INTERVAL = timedelta(seconds=30)
 
-ShlApiClient = SportsDbApiClient
-
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 
@@ -55,10 +53,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     specific_league = entry.data.get(CONF_SPECIFIC_LEAGUE)
 
     session = async_get_clientsession(hass)
-    client = ShlApiClient(api_key, team_ids, session, sport=sport,
+    client = SportsDbApiClient(api_key, team_ids, session, sport=sport,
                           league_filter=league_filter, specific_league=specific_league)
 
-    coordinator = ShlDataUpdateCoordinator(hass, client=client)
+    coordinator = TheSportsDbDataUpdateCoordinator(hass, client=client)
     await coordinator.async_refresh()
 
     if not coordinator.last_update_success:
@@ -74,7 +72,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     return True
 
 
-class ShlDataUpdateCoordinator(DataUpdateCoordinator):
+class TheSportsDbDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching data from the API."""
 
     def __init__(
