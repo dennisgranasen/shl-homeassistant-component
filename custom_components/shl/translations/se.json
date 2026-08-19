@@ -2,15 +2,35 @@
   "config": {
     "step": {
       "user": {
-        "description": "Kika här om du behöver hjälp: https://github.com/dennisgranasen/shl-homeassistant-component",
+        "description": "Ange din TheSportsDB API-nyckel och lagnamnet du vill följa. Använd 123 som API-nyckel om du inte har en.",
         "data": {
-          "api_key": "TheSportsDB API-nyckel (använd 123 om du inte har någon)",
-          "team_ids": "Svenska hockeylags namn"
+          "api_key": "TheSportsDB API-nyckel",
+          "team_name": "Lagnamn (t.ex. Rögle BK, Djurgården, Arsenal)"
+        }
+      },
+      "pick_sport": {
+        "description": "Flera sporter matchade det lagnamnet. Välj vilken idrott du menar.",
+        "data": {
+          "sport": "Idrott"
+        }
+      },
+      "pick_team": {
+        "description": "Flera lag hittades. Välj rätt lag.",
+        "data": {
+          "team": "Lag"
+        }
+      },
+      "league": {
+        "description": "Välj vilka tävlingar som ska inkluderas för det här laget.",
+        "data": {
+          "league_filter": "Ligafilter",
+          "specific_league": "Specifik liga (väljs bara när 'Specifik liga' är markerat ovan)"
         }
       }
     },
     "error": {
-      "auth": "Fel användarnamn/lösenord."
+      "auth": "Ogiltig API-nyckel.",
+      "team_not_found": "Inget lag hittades med det namnet. Prova en annan stavning."
     },
     "abort": {
       "single_instance_allowed": "Multipla instanser av denna komponent tillåts inte."
