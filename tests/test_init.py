@@ -1,4 +1,4 @@
-"""Test SHL setup process."""
+"""Test TheSportsDB setup process."""
 import pytest
 
 from homeassistant.exceptions import ConfigEntryNotReady

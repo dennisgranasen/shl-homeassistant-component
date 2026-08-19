@@ -1,9 +1,9 @@
 {
   "_output_dir": "/home/dennis/src/priv",
   "_template": "cookiecutter-homeassistant-custom-component",
-  "class_name_prefix": "Shl",
-  "domain_name": "shl",
-  "friendly_name": "SHL",
+  "class_name_prefix": "thesportsdb",
+  "domain_name": "thesportsdb",
+  "friendly_name": "TheSportsDB Team Tracker",
   "github_user": "dennisgranasen",
   "project_name": "shl-homeassistant-component",
   "test_suite": "yes",

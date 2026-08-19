@@ -1,6 +1,6 @@
 {
-  "domain": "teamtracker",
-  "name": "SportsDB Team Tracker",
+  "domain": "thesportsdb",
+  "name": "TheSportsDB Team Tracker",
   "version": "2026.8.0",
   "documentation": "https://github.com/dennisgranasen/shl-homeassistant-component",
   "issue_tracker": "https://github.com/dennisgranasen/shl-homeassistant-component/issues",

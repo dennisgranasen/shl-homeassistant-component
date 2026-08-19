@@ -1,4 +1,4 @@
-"""Global fixtures for SHL integration."""
+"""Global fixtures for TheSportsDB Team Tracker integration."""
 from unittest.mock import patch
 
 import aiohttp

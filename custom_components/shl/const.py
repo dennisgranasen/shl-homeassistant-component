@@ -1,7 +1,7 @@
 """Constants for SportsDb Team Tracker."""
 # Base component constants
-NAME = "SportsDB Team Tracker"
-DOMAIN = "teamtracker"
+NAME = "TheSportsDB Team Tracker"
+DOMAIN = "thesportsdb"
 DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "2026.8.0"
 

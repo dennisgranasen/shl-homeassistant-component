@@ -1,4 +1,4 @@
-"""Test SHL config flow."""
+"""Test TheSportsDB config flow."""
 from unittest.mock import patch
 
 import pytest
@@ -30,7 +30,7 @@ CREATE_ENTRY = data_entry_flow.FlowResultType.CREATE_ENTRY
 FAKE_TEAM = {
     "idTeam": "1234",
     "strTeam": "HV71",
-    "strSport": "Ice Hockey",
+    "strSport": "Hockey",
     "strLeague": "Swedish Hockey League",
     "strBadge": None,
 }
@@ -38,7 +38,7 @@ FAKE_TEAM = {
 FAKE_NATIONAL_TEAM = {
     "idTeam": "5678",
     "strTeam": "Sweden",
-    "strSport": "Ice Hockey",
+    "strSport": "Hockey",
     "strLeague": "IIHF World Championship",
     "strType": "National",
     "strBadge": None,
@@ -93,7 +93,7 @@ async def test_successful_config_flow_single_team(hass, bypass_get_data):
     assert result["type"] == CREATE_ENTRY
     assert result["title"] == "HV71"
     assert result["data"][CONF_TEAM_IDS] == ["HV71"]
-    assert result["data"][CONF_SPORT] == "Ice Hockey"
+    assert result["data"][CONF_SPORT] == "Hockey"
     assert result["data"][CONF_LEAGUE_FILTER] == LEAGUE_FILTER_ALL
     assert result["data"][CONF_IS_NATIONAL_TEAM] is False
 
@@ -138,7 +138,7 @@ async def test_config_flow_multi_sport(hass, bypass_get_data):
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
-            user_input={"sport": "Ice Hockey"},
+            user_input={"sport": "Hockey"},
         )
 
     # Only one team left after sport filter -> goes to league step

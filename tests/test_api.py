@@ -1,4 +1,4 @@
-"""Tests for SHL api."""
+"""Tests for TheSportsDB API."""
 import asyncio
 from datetime import date
 from datetime import timedelta
@@ -10,7 +10,6 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from custom_components.shl.api import (
     SportsDbApiClient,
-    ShlApiClient,
     normalize_team_stats,
 )
 from custom_components.shl.sensor import flatten_event

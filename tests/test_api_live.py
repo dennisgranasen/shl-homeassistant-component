@@ -1,4 +1,4 @@
-"""Opt-in live tests for the SHL API."""
+"""Opt-in live tests for TheSportsDB Team Tracker API."""
 import os
 from pathlib import Path
 
