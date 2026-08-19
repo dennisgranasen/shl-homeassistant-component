@@ -1,4 +1,4 @@
-"""API clients for the SHL / multi-sport Home Assistant integration."""
+"""API client for the TheSportsDB Home Assistant integration."""
 import asyncio
 import logging
 import socket

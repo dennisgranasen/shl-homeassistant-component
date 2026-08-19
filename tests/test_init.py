@@ -4,19 +4,19 @@ import pytest
 from homeassistant.exceptions import ConfigEntryNotReady
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.shl import (
+from custom_components.thesportsdb import (
     async_reload_entry,
 )
-from custom_components.shl import (
+from custom_components.thesportsdb import (
     async_setup_entry,
 )
-from custom_components.shl import (
+from custom_components.thesportsdb import (
     async_unload_entry,
 )
-from custom_components.shl import (
+from custom_components.thesportsdb import (
     ShlDataUpdateCoordinator,
 )
-from custom_components.shl.const import (
+from custom_components.thesportsdb.const import (
     DOMAIN,
 )
 

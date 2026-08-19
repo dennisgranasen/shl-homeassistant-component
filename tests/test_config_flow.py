@@ -7,7 +7,7 @@ from homeassistant import config_entries
 from homeassistant import data_entry_flow
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.shl.const import (
+from custom_components.thesportsdb.const import (
     CONF_API_KEY,
     CONF_IS_NATIONAL_TEAM,
     CONF_TEAM_IDS,

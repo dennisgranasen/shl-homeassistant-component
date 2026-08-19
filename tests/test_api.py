@@ -8,13 +8,13 @@ import pytest
 
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from custom_components.shl.api import (
+from custom_components.thesportsdb.api import (
     SportsDbApiClient,
     normalize_team_stats,
 )
-from custom_components.shl.sensor import flatten_event
-from custom_components.shl.sensor import ShlSensor
-from custom_components.shl.sensor import select_current_event
+from custom_components.thesportsdb.sensor import flatten_event
+from custom_components.thesportsdb.sensor import ShlSensor
+from custom_components.thesportsdb.sensor import select_current_event
 
 
 
