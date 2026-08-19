@@ -1,11 +1,11 @@
-"""Sensor platform for SHL."""
+"""Sensor platform for Teams from TheSportsDB."""
 from datetime import date
 
 from .const import DEFAULT_NAME
 from .const import DOMAIN
 from .const import ICON
 from .const import SENSOR
-from .entity import ShlEntity
+from .entity import TeamEntity
 
 
 def short_name(name: str | None) -> str | None:
@@ -85,12 +85,12 @@ async def async_setup_entry(hass, entry, async_add_devices):
     """Set up one sensor per configured SHL team."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
     team_ids = entry.data.get("team_ids", [])
-    sensors = [ShlSensor(coordinator, entry, team_id) for team_id in team_ids]
+    sensors = [TeamSensor(coordinator, entry, team_id) for team_id in team_ids]
     async_add_devices(sensors)
 
 
-class ShlSensor(ShlEntity):
-    """SHL team sensor for a Team Tracker-like dashboard."""
+class TeamSensor(TeamEntity):
+    """Team sensor for a Team Tracker-like dashboard."""
 
     def __init__(self, coordinator, config_entry, team_id):
         super().__init__(coordinator, config_entry)

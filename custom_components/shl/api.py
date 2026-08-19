@@ -21,9 +21,6 @@ TIMEOUT = 10
 _LOGGER: logging.Logger = logging.getLogger(__package__)
 
 HEADERS = {"Content-type": "application/json; charset=UTF-8", "User-Agent": f"{NAME}/{VERSION}"}
-BASE_URL = "https://openapi.shl.se"
-AUTH = "/oauth2/token"
-
 
 def normalize_team_stats(stats: dict) -> dict:
     """Normalize a team payload into a simple, card-friendly structure."""
@@ -38,123 +35,6 @@ def normalize_team_stats(stats: dict) -> dict:
 
     return normalized
 
-
-class ShlApiClient:
-    """Access the OpenAPI for the Swedish national hockey league (SHL)."""
-
-    def __init__(
-        self, client_id: str, client_secret: str, team_ids: list,
-        session: aiohttp.ClientSession
-    ) -> None:
-        """Sample API Client."""
-        self._client_id = client_id
-        self._client_secret = client_secret
-        self._team_ids = team_ids
-        self._session = session
-        self._expires = datetime.min
-        self._headers = None
-
-    async def async_connect(self) -> None:
-        """Authorize the client using supplied credentials."""
-        form = {'client_id': self._client_id,
-                'client_secret': self._client_secret,
-                'grant_type': 'client_credentials'}
-        headers = {'User-Agent': f"{NAME}/{VERSION}"}
-        body = await self.api_wrapper("post", f"{BASE_URL}{AUTH}", data=form, headers=headers)
-        self._expires = datetime.now() + timedelta(seconds=int(body["expires_in"]))
-        self._headers = HEADERS.copy()
-        self._headers["Authorization"] = "Bearer " + body["access_token"]
-        return body
-
-    def is_connected(self) -> bool:
-        """Check if authorization is valid."""
-        return self._headers and self._expires > datetime.now()
-
-    @staticmethod
-    def generate_url(query: str, season: int = 0) -> str:
-        """Generate the url for a specific query."""
-        return f"{BASE_URL}/seasons/{season}/{query}" if season else f"{BASE_URL}/{query}"
-
-    async def async_get_team_player_stats(self, team_code: str):
-        """Fetch team information, including staff, players and team facts."""
-        url = ShlApiClient.generate_url(f"teams/{team_code}.json")
-        return await self.api_wrapper("get", url)
-
-    async def async_get_data(self, season: int = 0, team_ids: list = None):
-        """Fetch a lightweight team-tracker payload for the configured teams."""
-        selected_teams = team_ids or self._team_ids or []
-        teams = []
-
-        for team_code in selected_teams:
-            team_payload = await self.async_get_team_player_stats(team_code)
-            team_data = team_payload.get("team") if isinstance(team_payload, dict) else {}
-            if not isinstance(team_data, dict):
-                team_data = {}
-            team_data.setdefault("team", team_code)
-            team_data.setdefault("team_name", team_code)
-            teams.append(normalize_team_stats(team_data))
-
-        if len(teams) == 1:
-            return {"team": teams[0], "teams": teams, "body": teams[0]}
-
-        return {"teams": teams, "body": teams}
-
-    async def api_wrapper(  # pylint: disable=dangerous-default-value,too-many-arguments
-        self, method: str, url: str, data: dict = {}, headers: dict = {}, params: dict = {}
-    ) -> dict:
-        """Get information from the API."""
-        if not headers and not self.is_connected():
-            await self.async_connect()
-        try:
-            async with async_timeout.timeout(TIMEOUT):
-                if method == "get":
-                    response = await self._session.get(url,
-                                                       headers=headers or self._headers,
-                                                       params=params)
-                    return await response.json()
-
-                if method == "put":
-                    await self._session.put(url,
-                                            headers=headers or self._headers,
-                                            json=data,
-                                            params=params)
-
-                elif method == "patch":
-                    await self._session.patch(url,
-                                              headers=headers or self._headers,
-                                              json=data,
-                                              params=params)
-
-                elif method == "post":
-                    response = await self._session.post(
-                        url,
-                        headers=headers or self._headers,
-                        json=data,
-                        params=params,
-                    )
-                    return await response.json()
-
-        except asyncio.TimeoutError as exception:
-            _LOGGER.error(
-                "Timeout error fetching information from %s - %s",
-                url,
-                exception,
-            )
-
-        except (KeyError, TypeError) as exception:
-            _LOGGER.error(
-                "Error parsing information from %s - %s",
-                url,
-                exception,
-            )
-        except (aiohttp.ClientError, socket.gaierror) as exception:
-            _LOGGER.error(
-                "Error fetching information from %s - %s",
-                url,
-                exception,
-            )
-        except Exception as exception:  # pylint: disable=broad-except
-            _LOGGER.error("Something really wrong happened! - %s", exception)
 
 
 # ---------------------------------------------------------------------------

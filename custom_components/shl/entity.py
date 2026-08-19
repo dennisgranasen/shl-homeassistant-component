@@ -1,4 +1,4 @@
-"""ShlEntity class"""
+"""TeamEntity class"""
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import ATTRIBUTION
@@ -7,8 +7,8 @@ from .const import NAME
 from .const import VERSION
 
 
-class ShlEntity(CoordinatorEntity):
-    """An entity for tracking SHL information"""
+class TeamEntity(CoordinatorEntity):
+    """An entity for tracking Team information"""
     def __init__(self, coordinator, config_entry):
         super().__init__(coordinator)
         self.config_entry = config_entry

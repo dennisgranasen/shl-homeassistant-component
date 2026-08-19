@@ -1,4 +1,4 @@
-"""Config flow for the multi-sport SHL/TheSportsDB integration."""
+"""Config flow for TheSportsDB integration."""
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
@@ -20,8 +20,8 @@ from .const import (
 )
 
 
-class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for the multi-sport integration."""
+class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+    """Config flow for TheSportsDB integration."""
 
     VERSION = 1
 
@@ -214,10 +214,10 @@ class ShlFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return ShlOptionsFlowHandler(config_entry)
+        return SportsDbOptionsFlowHandler(config_entry)
 
 
-class ShlOptionsFlowHandler(config_entries.OptionsFlow):
+class SportsDbOptionsFlowHandler(config_entries.OptionsFlow):
     """Options flow handler."""
 
     def __init__(self, config_entry):

@@ -1,9 +1,9 @@
-"""Constants for SHL."""
+"""Constants for SportsDb Team Tracker."""
 # Base component constants
-NAME = "SHL"
-DOMAIN = "shl"
+NAME = "SportsDB Team Tracker"
+DOMAIN = "teamtracker"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "1.0.0"
+VERSION = "2026.8.0"
 
 ATTRIBUTION = "Data provided by http://www.thesportsdb.com/"
 ISSUE_URL = "https://github.com/dennisgranasen/shl-homeassistant-component/issues"
@@ -37,7 +37,7 @@ LEAGUE_FILTER_SPECIFIC = "specific"
 DEFAULT_NAME = DOMAIN
 
 
-# Leagues to always block (Russian and Belarusian leagues)
+# Always block sports from those who bully Ukraine 
 BLOCKED_LEAGUES: set[str] = {
     "KHL",
     "Kontinental Hockey League",
@@ -76,7 +76,6 @@ INTERNATIONAL_LEAGUES: set[str] = {
     # Basketball
     "EuroLeague",
     "EuroCup Basketball",
-    "NBA",
     "FIBA Basketball World Cup",
     "EuroBasket",
     # Handball

@@ -108,7 +108,7 @@ async def test_config_flow_multi_sport(hass, bypass_get_data):
     soccer_team = {
         "idTeam": "5678",
         "strTeam": "HV71",
-        "strSport": "Soccer",
+        "strSport": "Soccer", # It's funny because HV71 is a hockey team, but let's pretend it's also a soccer team for this test
         "strLeague": "Swedish Allsvenskan",
         "strBadge": None,
     }
