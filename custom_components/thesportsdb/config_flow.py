@@ -37,7 +37,6 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self._selected_team: dict = {}
 
         self._selected_sport: str = ""
-        self._selected_country: str = ""
         self._selected_league: dict = {}
 
         self._sports: list = []
@@ -189,7 +188,7 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             self._selected_sport = user_input["sport"]
-            return await self.async_step_browse_country()
+            return await self.async_step_browse_league()
 
         try:
             self._sports = await client.async_get_sports()
@@ -204,39 +203,6 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required("sport"): vol.In(self._sports),
-                }
-            ),
-            errors=self._errors,
-        )
-
-    # ------------------------------------------------------------------
-    # Browse path – country
-    # ------------------------------------------------------------------
-
-    async def async_step_browse_country(self, user_input=None):
-        """Choose country."""
-        self._errors = {}
-
-        session = async_get_clientsession(self.hass)
-        client = SportsDbApiClient(self._api_key, [], session)
-
-        if user_input is not None:
-            self._selected_country = user_input["country"]
-            return await self.async_step_browse_league()
-
-        try:
-            self._countries = await client.async_get_countries()
-        except Exception:  # pylint: disable=broad-except
-            self._countries = []
-
-        if not self._countries:
-            self._errors["base"] = "cannot_load_countries"
-
-        return self.async_show_form(
-            step_id="browse_country",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("country"): vol.In(self._countries),
                 }
             ),
             errors=self._errors,
@@ -266,7 +232,7 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             self._leagues = await client.async_get_leagues(
                 sport=self._selected_sport,
-                country=self._selected_country,
+                
             )
         except Exception:  # pylint: disable=broad-except
             self._leagues = []
