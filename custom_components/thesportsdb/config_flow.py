@@ -45,6 +45,7 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self._countries: list = []
         self._leagues: list = []
         self._teams: list = []
+        self._browse_teams_loaded = False
 
     # ------------------------------------------------------------------
     # Step 1 – API key
@@ -195,7 +196,8 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self._selected_sport = user_input["sport"]
             self._selected_country = user_input["country"].strip()
-            return await self.async_step_browse_league()
+            self._browse_teams_loaded = False
+            return await self.async_step_browse_team()
 
         try:
             self._sports = await client.async_get_sports()
@@ -217,98 +219,80 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     # ------------------------------------------------------------------
-    # Browse path – league
-    # ------------------------------------------------------------------
-
-    async def async_step_browse_league(self, user_input=None):
-        """Choose league."""
-        self._errors = {}
-
-        session = async_get_clientsession(self.hass)
-        client = SportsDbApiClient(self._api_key, [], session)
-
-        if user_input is not None:
-            league_id = user_input["league"]
-
-            for league in self._leagues:
-                if str(league.get("idLeague")) == league_id:
-                    self._selected_league = league
-                    break
-
-            return await self.async_step_browse_team()
-
-        try:
-            self._leagues = await client.async_get_leagues(
-                sport=self._selected_sport,
-                country=self._selected_country,
-            )
-        except Exception:  # pylint: disable=broad-except
-            self._leagues = []
-
-        if not self._leagues:
-            self._errors["base"] = "cannot_load_leagues"
-
-        league_choices = {
-            str(league["idLeague"]): league.get("strLeague", "Unknown")
-            for league in self._leagues
-            if league.get("idLeague")
-        }
-
-        return self.async_show_form(
-            step_id="browse_league",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("league"): vol.In(league_choices),
-                }
-            ),
-            errors=self._errors,
-        )
-
     # ------------------------------------------------------------------
     # Browse path – team
     # ------------------------------------------------------------------
 
     async def async_step_browse_team(self, user_input=None):
-        """Choose team."""
+        """Choose a team or filter the current teams by league."""
         self._errors = {}
 
         session = async_get_clientsession(self.hass)
         client = SportsDbApiClient(self._api_key, [], session)
 
         if user_input is not None:
-            team_id = user_input["team"]
+            selection = user_input["selection"]
 
-            for team in self._teams:
-                if str(team.get("idTeam")) == team_id:
-                    self._selected_team = team
-                    break
+            if selection.startswith("team:"):
+                team_id = selection.removeprefix("team:")
+                for team in self._teams:
+                    if str(team.get("idTeam")) == team_id:
+                        self._selected_team = team
+                        self._team_leagues = None
+                        return await self.async_step_league()
 
-            return await self.async_step_league()
+            if selection.startswith("league:"):
+                league = selection.removeprefix("league:")
+                try:
+                    self._teams = await client.async_search_teams_by_league(league)
+                except Exception:  # pylint: disable=broad-except
+                    self._teams = []
+                self._browse_teams_loaded = True
+                return self._async_show_browse_team_form()
 
-        league_id = self._selected_league.get("idLeague")
+        if not self._browse_teams_loaded:
+            try:
+                self._teams = await client.async_search_teams_by_sport_and_country(
+                    self._selected_sport, self._selected_country
+                )
+            except Exception:  # pylint: disable=broad-except
+                self._teams = []
+            self._browse_teams_loaded = True
 
-        try:
-            self._teams = await client.async_get_teams_for_league(league_id)
-        except Exception:  # pylint: disable=broad-except
-            self._teams = []
+        return self._async_show_browse_team_form()
 
-        if not self._teams:
-            self._errors["base"] = "cannot_load_teams"
-
+    def _async_show_browse_team_form(self):
+        """Show teams and available leagues as a single selection list."""
         team_choices = {
-            str(team["idTeam"]): team.get("strTeam", "Unknown")
+            f"team:{team['idTeam']}": (
+                f"{team.get('strTeam', 'Unknown')} ({team.get('strLeague', 'Unknown')})"
+            )
             for team in sorted(
                 self._teams,
                 key=lambda team: (team.get("strTeam") or "").casefold(),
             )
             if team.get("idTeam")
         }
+        league_choices = {
+            f"league:{league}": f"Filter by league: {league}"
+            for league in sorted(
+                {
+                    team.get("strLeague")
+                    for team in self._teams
+                    if team.get("strLeague")
+                },
+                key=str.casefold,
+            )
+        }
+
+        if not team_choices:
+            self._errors["base"] = "team_not_found"
 
         return self.async_show_form(
             step_id="browse_team",
             data_schema=vol.Schema(
                 {
-                    vol.Required("team"): vol.In(team_choices),
+                    vol.Required("selection"): vol.In(team_choices | league_choices),
                 }
             ),
             errors=self._errors,

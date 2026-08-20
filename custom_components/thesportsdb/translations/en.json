@@ -27,10 +27,16 @@
         }
       },
       "browse_sport": {
-        "description": "Choose a sport and enter the country whose leagues you want to browse.",
+        "description": "Choose a sport and enter the country whose teams you want to browse.",
         "data": {
           "sport": "Sport",
           "country": "Country"
+        }
+      },
+      "browse_team": {
+        "description": "Choose a team, or choose a league to filter the list of teams.",
+        "data": {
+          "selection": "Team or league"
         }
       },
       "league": {

@@ -26,6 +26,19 @@
           "correct_team": "Detta är rätt lag"
         }
       },
+      "browse_sport": {
+        "description": "Välj en idrott och ange landet vars lag du vill bläddra bland.",
+        "data": {
+          "sport": "Idrott",
+          "country": "Land"
+        }
+      },
+      "browse_team": {
+        "description": "Välj ett lag, eller välj en liga för att filtrera laglistan.",
+        "data": {
+          "selection": "Lag eller liga"
+        }
+      },
       "league": {
         "description": "Välj vilka tävlingar som ska inkluderas för det här laget. Landslag spelar bara internationella tävlingar, så alternativet 'Endast nationella ligor och cuper' visas inte för dem.",
         "data": {

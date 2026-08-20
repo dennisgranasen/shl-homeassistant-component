@@ -321,6 +321,26 @@ class SportsDbApiClient:
             key=str.casefold,
         )
 
+    async def async_search_teams_by_sport_and_country(
+        self, sport: str, country: str
+    ) -> list[dict]:
+        """Return teams matching a sport and country."""
+        return await self._async_search_all_teams({"s": sport, "c": country})
+
+    async def async_search_teams_by_league(self, league: str) -> list[dict]:
+        """Return teams matching a league name."""
+        return await self._async_search_all_teams({"l": league})
+
+    async def _async_search_all_teams(self, params: dict) -> list[dict]:
+        """Search teams and exclude teams from blocked leagues."""
+        payload = await self._request("search_all_teams.php", params)
+        teams = payload.get("teams") or []
+        return [
+            team
+            for team in teams
+            if not _is_blocked(team.get("strLeague") or "")
+        ]
+
 
     async def async_get_leagues(
         self,
