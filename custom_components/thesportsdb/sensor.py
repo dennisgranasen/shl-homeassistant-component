@@ -114,13 +114,20 @@ class TeamSensor(TeamEntity):
         if isinstance(body, list):
             for team in body:
                 if isinstance(team, dict) and (
-                    team.get("requested_team", "").casefold() == self._team_id.casefold()
-                    or team.get("team", "").casefold() == self._team_id.casefold()
+                    str(team.get("idTeam", "")) == str(self._team_id)
+                    or team.get("requested_team", "").casefold()
+                    == str(self._team_id).casefold()
+                    or team.get("team", "").casefold()
+                    == str(self._team_id).casefold()
                 ):
                     return team
             return body[0] if body else {}
         if isinstance(body, dict):
-            if body.get("team") == self._team_id or body.get("team_name") == self._team_id:
+            if (
+                str(body.get("idTeam", "")) == str(self._team_id)
+                or body.get("team") == self._team_id
+                or body.get("team_name") == self._team_id
+            ):
                 return body
         return {}
 

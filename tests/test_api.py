@@ -90,9 +90,11 @@ def test_sensor_exposes_team_tracker_card_attributes():
     class ConfigEntry:
         entry_id = "test-entry"
 
-    sensor = TeamSensor(Coordinator(), ConfigEntry(), "HV71")
+    sensor = TeamSensor(Coordinator(), ConfigEntry(), "135142")
 
     assert sensor.state == "PRE"
+    assert sensor.extra_state_attributes["team_name"] == "HV71"
+    assert sensor.extra_state_attributes["team_id"] == "135142"
     assert sensor.extra_state_attributes["sport"] == "hockey"
     assert sensor.extra_state_attributes["team_abbr"] == "HV71"
     assert sensor.extra_state_attributes["team_logo"] == "https://example.test/hv71.png"
