@@ -6,7 +6,7 @@ DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "2026.8.0"
 
 ATTRIBUTION = "Data provided by http://www.thesportsdb.com/"
-ISSUE_URL = "https://github.com/dennisgranasen/shl-homeassistant-component/issues"
+ISSUE_URL = "https://github.com/dennisgranasen/thesportsdb-homeassistant-component/issues"
 
 # Icons
 ICON = "mdi:format-quote-close"
@@ -22,7 +22,7 @@ PLATFORMS = [SENSOR]
 # Configuration and options
 CONF_ENABLED = "enabled"
 CONF_API_KEY = "api_key"
-CONF_TEAM_IDS = "team_ids"
+CONF_TEAM_ID = "team_id"
 CONF_SPORT = "sport"
 CONF_LEAGUE_FILTER = "league_filter"
 CONF_SPECIFIC_LEAGUE = "specific_league"

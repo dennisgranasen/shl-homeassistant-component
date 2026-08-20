@@ -209,9 +209,10 @@ class SportsDbApiClient:
                 if (e.get("strLeague") or "").casefold() == self._specific_league.casefold()
             ]
         return result
+    
 
     async def async_get_data(self) -> dict:
-        """Fetch Team Tracker-compatible data for all configured teams."""
+        """Fetch Team Tracker-compatible data for the configured team."""
         try:
             live_scores = await self.async_get_live_scores()
         except (aiohttp.ClientError, asyncio.TimeoutError):
@@ -219,35 +220,142 @@ class SportsDbApiClient:
 
         live_scores = self._apply_live_score_filter(live_scores)
 
-        teams = []
-        for team_name in self._team_ids:
-            team = await self.async_get_team(team_name)
-            if not team:
-                continue
-            team_id = team.get("idTeam")
-            next_events = await self.async_get_next_events(team_id) if team_id else []
-            previous_events = (
-                await self.async_get_previous_events(team_id) if team_id else []
-            )
-            live_events = [
-                event
-                for event in live_scores
-                if str(event.get("idHomeTeam")) == str(team_id)
-                or str(event.get("idAwayTeam")) == str(team_id)
-            ]
-            teams.append(
-                {
-                    **team,
-                    "requested_team": team_name,
-                    "team": team.get("strTeam", team_name),
-                    "team_name": team.get("strTeam", team_name),
-                    "next_events": next_events,
-                    "previous_events": previous_events,
-                    "live_events": live_events,
-                    "status": next_events[0].get("strStatus") if next_events else None,
-                }
-            )
+        if not self._team_id:
+            return {"teams": [], "body": []}
 
-        if len(teams) == 1:
-            return {"team": teams[0], "teams": teams, "body": teams[0]}
-        return {"teams": teams, "body": teams}
+        team = await self.async_get_team_by_id(self._team_id)
+
+        if not team:
+            return {"teams": [], "body": []}
+
+        team_id = team.get("idTeam")
+
+        next_events = (
+            await self.async_get_next_events(team_id)
+            if team_id
+            else []
+        )
+
+        previous_events = (
+            await self.async_get_previous_events(team_id)
+            if team_id
+            else []
+        )
+
+        live_events = [
+            event
+            for event in live_scores
+            if str(event.get("idHomeTeam")) == str(team_id)
+            or str(event.get("idAwayTeam")) == str(team_id)
+        ]
+
+        team_name = team.get("strTeam", str(self._team_id))
+
+        team_data = {
+            **team,
+            "requested_team": team_name,
+            "team": team_name,
+            "team_name": team_name,
+            "next_events": next_events,
+            "previous_events": previous_events,
+            "live_events": live_events,
+            "status": (
+                next_events[0].get("strStatus")
+                if next_events
+                else None
+            ),
+        }
+
+        return {
+            "team": team_data,
+            "teams": [team_data],
+            "body": team_data,
+        }
+
+
+    async def async_get_sports(self) -> list[str]:
+        """Return all available sports."""
+        payload = await self._request("all_sports.php")
+
+        sports = payload.get("sports") or []
+
+        return sorted(
+            {
+                sport.get("strSport")
+                for sport in sports
+                if sport.get("strSport")
+            },
+            key=str.casefold,
+        )
+
+
+    async def async_get_countries(self) -> list[str]:
+        """Return all available countries."""
+        payload = await self._request("all_countries.php")
+
+        countries = payload.get("countries") or []
+
+        return sorted(
+            {
+                country.get("name_en")
+                for country in countries
+                if country.get("name_en")
+            },
+            key=str.casefold,
+        )
+
+
+    async def async_get_leagues(
+        self,
+        sport: str,
+        country: str,
+    ) -> list[dict]:
+        """Return leagues matching sport and country."""
+        payload = await self._request(
+            "search_all_leagues.php",
+            {
+                "s": sport,
+                "c": country,
+            },
+        )
+
+        leagues = payload.get("countries") or []
+
+        return [
+            league
+            for league in leagues
+            if not _is_blocked(league.get("strLeague") or "")
+        ]
+
+
+    async def async_get_teams_for_league(
+        self,
+        league_id: str,
+    ) -> list[dict]:
+        """Return teams in a league."""
+        payload = await self._request(
+            "lookup_all_teams.php",
+            {"id": league_id},
+        )
+
+        teams = payload.get("teams") or []
+
+        return [
+            team
+            for team in teams
+            if not _is_blocked(team.get("strLeague") or "")
+        ]
+
+    async def async_get_team_by_id(self, team_id: str) -> dict:
+        """Get a team directly by TheSportsDB ID."""
+        payload = await self._request(
+            "lookupteam.php",
+            {"id": team_id},
+        )
+
+        teams = payload.get("teams") or []
+
+        if not teams:
+            return {}
+
+        return teams[0]

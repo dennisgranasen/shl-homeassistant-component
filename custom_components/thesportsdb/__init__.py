@@ -18,7 +18,7 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from .api import SportsDbApiClient
 from .const import CONF_API_KEY
-from .const import CONF_TEAM_IDS
+from .const import CONF_TEAM_ID
 from .const import CONF_SPORT
 from .const import CONF_LEAGUE_FILTER
 from .const import CONF_SPECIFIC_LEAGUE
@@ -44,16 +44,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         _LOGGER.info(STARTUP_MESSAGE)
 
     api_key = entry.data.get(CONF_API_KEY) or entry.data.get("client_secret") or entry.data.get("client_id")
-    team_ids = entry.data.get(CONF_TEAM_IDS)
-    if isinstance(team_ids, str):
-        team_ids = [team.strip() for team in team_ids.split(",") if team.strip()]
+    team_id = entry.data.get(CONF_TEAM_ID)
 
     sport = entry.data.get(CONF_SPORT)
     league_filter = entry.data.get(CONF_LEAGUE_FILTER, LEAGUE_FILTER_ALL)
     specific_league = entry.data.get(CONF_SPECIFIC_LEAGUE)
 
     session = async_get_clientsession(hass)
-    client = SportsDbApiClient(api_key, team_ids, session, sport=sport,
+    client = SportsDbApiClient(api_key, team_id, session, sport=sport,
                           league_filter=league_filter, specific_league=specific_league)
 
     coordinator = TheSportsDbDataUpdateCoordinator(hass, client=client)

@@ -10,7 +10,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.thesportsdb.const import (
     CONF_API_KEY,
     CONF_IS_NATIONAL_TEAM,
-    CONF_TEAM_IDS,
+    CONF_TEAM_ID,
     CONF_SPORT,
     CONF_LEAGUE_FILTER,
     CONF_SPECIFIC_LEAGUE,
@@ -92,7 +92,7 @@ async def test_successful_config_flow_single_team(hass, bypass_get_data):
 
     assert result["type"] == CREATE_ENTRY
     assert result["title"] == "HV71"
-    assert result["data"][CONF_TEAM_IDS] == ["HV71"]
+    assert result["data"][CONF_TEAM_ID] == "HV71"
     assert result["data"][CONF_SPORT] == "Hockey"
     assert result["data"][CONF_LEAGUE_FILTER] == LEAGUE_FILTER_ALL
     assert result["data"][CONF_IS_NATIONAL_TEAM] is False
