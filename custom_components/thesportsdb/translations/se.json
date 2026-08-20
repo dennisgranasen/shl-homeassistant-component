@@ -20,6 +20,12 @@
           "team": "Lag"
         }
       },
+      "confirm_team": {
+        "description": "Vill du följa {team} ({sport})? TheSportsDB anger {league} som lagets primära liga. Bland senaste och kommande matcher finns: {leagues}.",
+        "data": {
+          "correct_team": "Detta är rätt lag"
+        }
+      },
       "league": {
         "description": "Välj vilka tävlingar som ska inkluderas för det här laget. Landslag spelar bara internationella tävlingar, så alternativet 'Endast nationella ligor och cuper' visas inte för dem.",
         "data": {

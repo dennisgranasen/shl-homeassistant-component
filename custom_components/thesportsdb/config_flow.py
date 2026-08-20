@@ -35,8 +35,10 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self._team_name: str = ""
         self._team_candidates: list = []
         self._selected_team: dict = {}
+        self._team_leagues: list[str] | None = None
 
         self._selected_sport: str = ""
+        self._selected_country: str = ""
         self._selected_league: dict = {}
 
         self._sports: list = []
@@ -132,6 +134,7 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 # Keep the list structure in case that changes.
                 self._team_candidates = candidates
                 self._selected_team = candidates[0]
+                self._team_leagues = None
 
                 return await self.async_step_confirm_team()
 
@@ -161,6 +164,8 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             # Wrong result: let the user choose another lookup method.
             return await self.async_step_method()
 
+        await self._async_load_team_leagues()
+
         return self.async_show_form(
             step_id="confirm_team",
             data_schema=vol.Schema(
@@ -172,6 +177,7 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 "team": self._selected_team.get("strTeam", "Unknown"),
                 "sport": self._selected_team.get("strSport", "Unknown"),
                 "league": self._selected_team.get("strLeague", "Unknown"),
+                "leagues": ", ".join(self._team_leagues) or "Unknown",
             },
         )
 
@@ -188,6 +194,7 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             self._selected_sport = user_input["sport"]
+            self._selected_country = user_input["country"].strip()
             return await self.async_step_browse_league()
 
         try:
@@ -203,6 +210,7 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required("sport"): vol.In(self._sports),
+                    vol.Required("country"): vol.All(str, vol.Length(min=1)),
                 }
             ),
             errors=self._errors,
@@ -232,7 +240,7 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             self._leagues = await client.async_get_leagues(
                 sport=self._selected_sport,
-                
+                country=self._selected_country,
             )
         except Exception:  # pylint: disable=broad-except
             self._leagues = []
@@ -344,18 +352,8 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     data=data,
                 )
 
-        session = async_get_clientsession(self.hass)
-        client = SportsDbApiClient(self._api_key, [], session)
-
-        team_id = self._selected_team.get("idTeam")
-
-        leagues = []
-
-        if team_id:
-            try:
-                leagues = await client.async_get_leagues_for_team(team_id)
-            except Exception:  # pylint: disable=broad-except
-                leagues = []
+        await self._async_load_team_leagues()
+        leagues = self._team_leagues or []
 
         filter_options = {
             LEAGUE_FILTER_ALL: "All leagues (including international)",
@@ -386,6 +384,23 @@ class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(schema_dict),
             errors=self._errors,
         )
+
+    async def _async_load_team_leagues(self) -> None:
+        """Load and cache leagues for the selected team."""
+        if self._team_leagues is not None:
+            return
+
+        self._team_leagues = []
+        team_id = self._selected_team.get("idTeam")
+        if not team_id:
+            return
+
+        session = async_get_clientsession(self.hass)
+        client = SportsDbApiClient(self._api_key, [], session)
+        try:
+            self._team_leagues = await client.async_get_leagues_for_team(team_id)
+        except Exception:  # pylint: disable=broad-except
+            pass
 
     # ------------------------------------------------------------------
     # Options flow

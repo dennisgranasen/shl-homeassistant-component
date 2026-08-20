@@ -20,6 +20,19 @@
           "team": "Team"
         }
       },
+      "confirm_team": {
+        "description": "Track {team} ({sport})? TheSportsDB lists its primary league as {league}. Recent and upcoming matches include: {leagues}.",
+        "data": {
+          "correct_team": "This is the correct team"
+        }
+      },
+      "browse_sport": {
+        "description": "Choose a sport and enter the country whose leagues you want to browse.",
+        "data": {
+          "sport": "Sport",
+          "country": "Country"
+        }
+      },
       "league": {
         "description": "Choose which competitions to include for this team. National teams only have international competitions, so 'National leagues and cups only' is not available for them.",
         "data": {

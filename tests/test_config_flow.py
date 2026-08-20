@@ -67,7 +67,7 @@ async def test_successful_config_flow_search(hass):
         return_value=[FAKE_TEAM],
     ), patch(
         "custom_components.thesportsdb.config_flow.SportsDbApiClient.async_get_leagues_for_team",
-        return_value=["Swedish Hockey League"],
+        return_value=["Swedish Hockey League", "Champions Hockey League"],
     ):
         result = await _start_search_flow(hass)
         assert result["step_id"] == "search"
@@ -76,6 +76,10 @@ async def test_successful_config_flow_search(hass):
             result["flow_id"], user_input={"team_name": "HV71"}
         )
         assert result["step_id"] == "confirm_team"
+        assert result["description_placeholders"]["team"] == "HV71"
+        assert result["description_placeholders"]["leagues"] == (
+            "Swedish Hockey League, Champions Hockey League"
+        )
 
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], user_input={"correct_team": True}
@@ -158,6 +162,40 @@ async def test_failed_config_flow_team_not_found(hass):
     assert result["type"] == FORM
     assert result["step_id"] == "search"
     assert result["errors"] == {"base": "team_not_found"}
+
+
+async def test_browse_flow_accepts_user_entered_country(hass):
+    """Use a typed country together with the selected sport to load leagues."""
+    leagues = [{"idLeague": "4380", "strLeague": "Swedish Hockey League"}]
+
+    with patch(
+        "custom_components.thesportsdb.config_flow.SportsDbApiClient.async_connect",
+        return_value={},
+    ), patch(
+        "custom_components.thesportsdb.config_flow.SportsDbApiClient.async_get_sports",
+        return_value=["Ice Hockey"],
+    ), patch(
+        "custom_components.thesportsdb.config_flow.SportsDbApiClient.async_get_leagues",
+        return_value=leagues,
+    ) as get_leagues:
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={CONF_API_KEY: "123"}
+        )
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], user_input={"method": "browse"}
+        )
+        assert result["step_id"] == "browse_sport"
+
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            user_input={"sport": "Ice Hockey", "country": " Sweden "},
+        )
+
+    assert result["step_id"] == "browse_league"
+    get_leagues.assert_awaited_once_with(sport="Ice Hockey", country="Sweden")
 
 
 async def test_options_flow(hass):

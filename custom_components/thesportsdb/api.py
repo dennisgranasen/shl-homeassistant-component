@@ -292,18 +292,18 @@ class SportsDbApiClient:
             key=str.casefold,
         )"""
         return ["Ice Hockey",
-                "Soccer", 
-                "Basketball", 
-                "Baseball",
-                "American Football",
-                "Rugby",
-                "Volleyball",
-                "Cricket",
-                "Esports",
-                "Handball",
-                "Netball",
-                "Field hockey",
-                "Gaelic football"]
+                 "Soccer", 
+                 "Basketball", 
+                 "Baseball",
+                 "American Football",
+                 "Rugby",
+                 "Volleyball",
+                 "Cricket",
+                 "Esports",
+                 "Handball",
+                 "Netball",
+                 "Field hockey",
+                 "Gaelic football"]
 
 
     async def async_get_countries(self) -> list[str]:
@@ -324,17 +324,19 @@ class SportsDbApiClient:
 
     async def async_get_leagues(
         self,
-        sport: str
+        sport: str,
+        country: str,
     ) -> list[dict]:
         """Return leagues matching sport and country."""
         payload = await self._request(
             "search_all_leagues.php",
             {
                 "s": sport,
+                "c": country,
             },
         )
 
-        leagues = payload.get("leagues")or []
+        leagues = payload.get("countries") or []
 
         return [
             league
