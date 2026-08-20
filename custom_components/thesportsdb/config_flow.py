@@ -25,7 +25,7 @@ from .const import (
 class SportsDbFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for TheSportsDB integration."""
 
-    VERSION = 
+    VERSION = 1
 
     def __init__(self):
         """Initialize config flow."""

@@ -33,8 +33,8 @@ def skip_notifications_fixture():
 
 
 @pytest.fixture(autouse=True)
-def enable_shl_custom_integration(enable_custom_integrations):
-    """Allow Home Assistant to discover the custom SHL integration."""
+def enable_thesportsdb_custom_integration(enable_custom_integrations):
+    """Allow Home Assistant to discover the custom TheSportsDB integration."""
     yield
 
 
@@ -44,10 +44,10 @@ def enable_shl_custom_integration(enable_custom_integrations):
 def bypass_get_data_fixture():
     """Skip calls to get data from API."""
     with patch(
-        "custom_components.shl.SportsDbApiClient.async_get_data",
+        "custom_components.thesportsdb.SportsDbApiClient.async_get_data",
         return_value={"body": []},
     ), patch(
-        "custom_components.shl.SportsDbApiClient.async_connect",
+        "custom_components.thesportsdb.SportsDbApiClient.async_connect",
         return_value={"sports": []},
     ):
         yield
@@ -59,10 +59,10 @@ def bypass_get_data_fixture():
 def error_get_data_fixture():
     """Simulate error when retrieving data from API."""
     with patch(
-        "custom_components.shl.SportsDbApiClient.async_get_data",
+        "custom_components.thesportsdb.SportsDbApiClient.async_get_data",
         side_effect=Exception,
     ), patch(
-        "custom_components.shl.SportsDbApiClient.async_connect",
+        "custom_components.thesportsdb.SportsDbApiClient.async_connect",
         side_effect=Exception,
     ):
         yield

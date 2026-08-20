@@ -5,6 +5,7 @@ from .const import DEFAULT_NAME
 from .const import DOMAIN
 from .const import ICON
 from .const import SENSOR
+from .const import CONF_TEAM_ID
 from .entity import TeamEntity
 
 
@@ -84,8 +85,8 @@ def select_current_event(team: dict) -> tuple[dict, str]:
 async def async_setup_entry(hass, entry, async_add_devices):
     """Set up one sensor per configured SHL team."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    team_ids = entry.data.get("team_ids", [])
-    sensors = [TeamSensor(coordinator, entry, team_id) for team_id in team_ids]
+    team_id = entry.data.get(CONF_TEAM_ID)
+    sensors = [TeamSensor(coordinator, entry, team_id)] if team_id else []
     async_add_devices(sensors)
 
 

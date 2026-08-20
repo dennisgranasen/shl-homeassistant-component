@@ -14,7 +14,7 @@ from custom_components.thesportsdb import (
     async_unload_entry,
 )
 from custom_components.thesportsdb import (
-    ShlDataUpdateCoordinator,
+    TheSportsDbDataUpdateCoordinator,
 )
 from custom_components.thesportsdb.const import (
     DOMAIN,
@@ -35,16 +35,19 @@ async def test_setup_unload_and_reload_entry(hass, bypass_get_data):  # pylint: 
     config_entry.add_to_hass(hass)
 
     # Set up the entry and assert that the values set during setup are where we expect
-    # them to be. Because we have patched the ShlDataUpdateCoordinator.async_get_data
-    # call, no code from custom_components/shl/api.py actually runs.
+    # them to be. The fixture prevents calls to the TheSportsDB API.
     assert await hass.config_entries.async_setup(config_entry.entry_id)
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
-    assert isinstance(hass.data[DOMAIN][config_entry.entry_id], ShlDataUpdateCoordinator)
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], TheSportsDbDataUpdateCoordinator
+    )
 
     # Reload the entry and assert that the data from above is still there
     assert await async_reload_entry(hass, config_entry) is None
     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
-    assert isinstance(hass.data[DOMAIN][config_entry.entry_id], ShlDataUpdateCoordinator)
+    assert isinstance(
+        hass.data[DOMAIN][config_entry.entry_id], TheSportsDbDataUpdateCoordinator
+    )
 
     # Unload the entry and verify that the data has been removed
     assert await async_unload_entry(hass, config_entry)

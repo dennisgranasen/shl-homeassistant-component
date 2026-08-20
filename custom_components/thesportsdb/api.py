@@ -91,14 +91,16 @@ class SportsDbApiClient:
     def __init__(
         self,
         api_key: str,
-        team_ids: list,
+        team_id: str | list,
         session: aiohttp.ClientSession,
         sport=None,
         league_filter: str = LEAGUE_FILTER_ALL,
         specific_league=None,
     ) -> None:
         self._api_key = api_key
-        self._team_ids = team_ids or []
+        self._team_id = (
+            str(team_id[0]) if isinstance(team_id, list) and team_id else str(team_id)
+        )
         self._session = session
         self._sport = sport            # e.g. "Ice Hockey", "Soccer"; None = any sport
         self._league_filter = league_filter
@@ -249,7 +251,7 @@ class SportsDbApiClient:
             or str(event.get("idAwayTeam")) == str(team_id)
         ]
 
-        team_name = team.get("strTeam", str(self._team_id))
+        team_name = team.get("strTeam", self._team_id)
 
         team_data = {
             **team,

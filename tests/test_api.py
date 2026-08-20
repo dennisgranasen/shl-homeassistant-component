@@ -13,8 +13,8 @@ from custom_components.thesportsdb.api import (
     normalize_team_stats,
 )
 from custom_components.thesportsdb.sensor import flatten_event
-from custom_components.thesportsdb.sensor import ShlSensor
 from custom_components.thesportsdb.sensor import select_current_event
+from custom_components.thesportsdb.sensor import TeamSensor
 
 
 
@@ -90,7 +90,7 @@ def test_sensor_exposes_team_tracker_card_attributes():
     class ConfigEntry:
         entry_id = "test-entry"
 
-    sensor = ShlSensor(Coordinator(), ConfigEntry(), "HV71")
+    sensor = TeamSensor(Coordinator(), ConfigEntry(), "HV71")
 
     assert sensor.state == "PRE"
     assert sensor.extra_state_attributes["sport"] == "hockey"
@@ -123,7 +123,7 @@ async def test_sportsdb_client_returns_team_tracker_data():
 
     class Session:
         def get(self, url, params=None, **_kwargs):
-            if url.endswith("searchteams.php"):
+            if url.endswith("lookupteam.php"):
                 return Response(
                     {
                         "teams": [
@@ -140,7 +140,7 @@ async def test_sportsdb_client_returns_team_tracker_data():
                 return Response({"events": [{"strStatus": "Not Started"}]})
             return Response({"results": [{"strStatus": "Match Finished"}]})
 
-    client = SportsDbApiClient("123", ["HV71"], Session())
+    client = SportsDbApiClient("123", "135142", Session())
 
     result = await client.async_get_data()
 
@@ -152,8 +152,8 @@ async def test_sportsdb_client_returns_team_tracker_data():
     ]
 
 
-async def test_sportsdb_client_prefers_djurgarden_hockey_team():
-    """Prefer the SHL team when TheSportsDB returns a football namesake."""
+async def test_sportsdb_client_filters_team_search_by_configured_sport():
+    """Return the matching sport when a team name has several results."""
     class Response:
         def __init__(self, payload):
             self.payload = payload
@@ -171,18 +171,15 @@ async def test_sportsdb_client_prefers_djurgarden_hockey_team():
             return self.payload
 
     class Session:
-        def get(self, _url, params=None, **_kwargs):
-            if params["t"] == "Djurgården":
-                return Response(
-                    {
-                        "teams": [
-                            {"strTeam": "Djurgården", "strSport": "Soccer"}
-                        ]
-                    }
-                )
+        def get(self, _url, _params=None, **_kwargs):
             return Response(
                 {
                     "teams": [
+                        {
+                            "idTeam": "135140",
+                            "strTeam": "Djurgården",
+                            "strSport": "Soccer",
+                        },
                         {
                             "idTeam": "135139",
                             "strTeam": "Djurgårdens IF",
@@ -193,7 +190,7 @@ async def test_sportsdb_client_prefers_djurgarden_hockey_team():
                 }
             )
 
-    client = SportsDbApiClient("123", [], Session())
+    client = SportsDbApiClient("123", [], Session(), sport="Ice Hockey")
 
     team = await client.async_get_team("Djurgården")
 
